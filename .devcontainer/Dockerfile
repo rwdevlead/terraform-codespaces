@@ -1,5 +1,8 @@
 # Dockerfile
 FROM hashicorp/terraform:latest
 
-# Install git
-RUN apk add --no-cache git jq logrotate
+# Install additional packages including git
+RUN apk add --no-cache git zsh curl bash
+
+# Install Oh My Zsh
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

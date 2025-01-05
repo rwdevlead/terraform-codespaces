@@ -1,21 +1,21 @@
+# .devcontainer/devcontainer.json
 {
-  "name": "Terraform Standard",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
-  // Use the official Vault image from Docker Hub
-  "image": "hashicorp/terraform:latest",
-
-  // Override the default Docker command so we can run our own
-  "overrideCommand": false,
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
-  },
-
-  // Install the HashiCorp Terraform extension for VS Code
-  "customizations": {
-    "vscode": {
-      "extensions": ["hashicorp.hcl"]
-    }
-  }
+    "name": "Terraform Development Environment",
+    "build": {
+        "dockerfile": "Dockerfile",
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "hashicorp.terraform",
+                "github.copilot",
+                "github.vscode-pull-request-github"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh"
+            }
+        }
+    },
+    "remoteUser": "root",
+    "postCreateCommand": "terraform --version && git --version"
 }
