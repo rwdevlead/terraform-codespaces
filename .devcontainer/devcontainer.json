@@ -11,7 +11,10 @@
                 "github.vscode-pull-request-github"
             ],
             "settings": {
-                "terminal.integrated.defaultProfile.linux": "zsh"
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "workbench.editorAssociations": {
+                    "*.md": "vscode.markdown.preview"
+                }
             }
         }
     },
