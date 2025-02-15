@@ -9,6 +9,14 @@ In this lab, you will create your first Terraform configuration for Azure by set
 
 Note: Azure credentials are not required for this lab as we will only be configuring the provider without creating any resources.
 
+## How to Use This Hands-On Lab
+
+1. **Create a Codespace** from this repo (click the button below).  
+2. Once the Codespace is running, open the integrated terminal.
+3. Follow the instructions in each **lab** to complete the exercises.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
+
 ## Estimated Time
 15 minutes
 
