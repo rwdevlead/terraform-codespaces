@@ -55,9 +55,7 @@ labs/
 └── terraform/
     ├── main.tf
     ├── providers.tf
-    ├── variables.tf
-    ├── .terraform.lock.hcl
-    └── .terraform/
+    └── variables.tf
 ```
 
 This directory will be your working environment for the upcoming labs as we build our infrastructure incrementally.
