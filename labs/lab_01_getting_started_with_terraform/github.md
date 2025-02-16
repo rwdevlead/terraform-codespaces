@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will create your first Terraform configuration for GitHub by setting up the required file structure and implementing the GitHub provider configuration. You'll learn how to format, validate, and initialize a Terraform working directory.
 
+**Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
+
 ## Prerequisites
 - Terraform installed
 - VS Code or preferred code editor installed
