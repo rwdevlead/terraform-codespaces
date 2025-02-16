@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will create your first Terraform configuration for AWS by setting up the required file structure and implementing the AWS provider configuration. You'll learn how to format, validate, and initialize a Terraform working directory.
 
+**Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
+
 ## Prerequisites
 - Terraform installed
 - VS Code or preferred code editor installed
@@ -91,6 +93,29 @@ terraform fmt
 Expected output: If any files were formatted, their names will be listed. If no formatting was needed, there will be no output.
 
 ### 5. Validate the Configuration
+ Initialize the working directory to prep the environment and download the provider:
+
+ ```bash
+ terraform init
+ ```
+
+Expected output:
+```bash
+Initializing the backend...
+Initializing provider plugins...
+- Finding hashicorp/aws versions matching "~> 5.0"...
+- Installing hashicorp/aws v5.87.0...
+- Installed hashicorp/aws v5.87.0 (signed by HashiCorp)
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+
+Terraform has been successfully initialized!
+```
+
+### 6. Validate the Configuration
 
 Run the validation command to check for syntax errors:
 
@@ -121,10 +146,12 @@ terraform init
 
 You should see an error message similar to:
 ```
-Error: Unsupported Terraform Core version
-
-This configuration requires Terraform version >= 99.0.0, but the current version
-is x.x.x. Please upgrade Terraform to a supported version.
+Initializing the backend...
+╷
+│ Error: Unsupported Terraform Core version
+│ 
+│   on providers.tf line 2, in terraform:
+│    2:   required_version = ">= 99.0.0" # Replace with your installed version
 ```
 
 3. Change the version requirement back to your current version:
@@ -149,11 +176,11 @@ After completing the lab, verify your work:
 ```
 labs/
 └── terraform/
+    ├── .terraform/
+    ├── .terraform.lock.hcl
     ├── main.tf
     ├── providers.tf
-    ├── variables.tf
-    ├── .terraform.lock.hcl
-    └── .terraform/
+    └── variables.tf
 ```
 
 2. Verify the following:
