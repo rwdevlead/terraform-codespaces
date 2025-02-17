@@ -40,9 +40,9 @@ export AWS_SECRET_ACCESS_KEY="your_secret_key"
 
 ### 3. Add VPC Resource Configuration
 
-Open main.tf and add the following VPC configuration (purposely not written in HCL canonical style):
+Open `main.tf` and add the following VPC configuration (purposely not written in HCL canonical style):
 
-```bash
+```hcl
 # Create the primary VPC for workloads
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -99,9 +99,9 @@ aws ec2 describe-vpcs --filters "Name=tag:Name,Values=terraform-course" --region
 
 ### 8. Update the VPC Resource
 
-In the main.tf file, and update the  VPC configuration:
+In the `main.tf` file, and update the  VPC configuration:
 
-```bash
+```hcl
 # Create the primary VPC for workloads
 resource "aws_vpc" "main" {
   cidr_block           = "192.168.0.0/16" # <-- change IP Address
@@ -124,12 +124,12 @@ terraform plan
 ```
 
 Since the IP address of a VPC cannot be changed, the plan output will show that Terraform intends to replace the VPC:
-- the VPC with a CIDR block of 10.0.0.0/16 will be destroyed
-- a VPC with a CIDR block of 192.168.0.0/16 will be created
+- the VPC with a CIDR block of `10.0.0.0/16` will be destroyed
+- a VPC with a CIDR block of `192.168.0.0/16` will be created
 
 Expected Output:
 
-```
+```bash
 aws_vpc.main: Refreshing state... [id=vpc-xxxxx]
 
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
@@ -151,9 +151,9 @@ Review the proposed changes and type `yes` when prompted to confirm.
 
 ### 11. Update the Tags on the VPC
 
-In the `main.tf` file, and update the  VPC configuration:
+In the `main.tf` file, and update the VPC configuration:
 
-```bash
+```hcl
 # Create the primary VPC for workloads
 resource "aws_vpc" "main" {
   cidr_block           = "192.168.0.0/16"
@@ -205,7 +205,7 @@ Review the proposed changes and type `yes` when prompted to confirm.
 
 Confirm that:
 1. The VPC exists in your AWS account with:
-   - CIDR block: 192.168.0.0/16
+   - CIDR block: `192.168.0.0/16`
    - DNS hostnames enabled
    - DNS support enabled
    - All specified tags present

@@ -52,7 +52,7 @@ touch main.tf variables.tf providers.tf
 You can also just create these in VSCode by right-clicking the directory.
 
 Your directory structure should look like this:
-```
+```bash
 labs/
 └── terraform/
     ├── main.tf

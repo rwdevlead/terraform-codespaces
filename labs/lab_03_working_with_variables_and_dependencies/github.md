@@ -86,7 +86,7 @@ Run a plan to see the current state:
 terraform plan
 ```
 
-You should see no changes planned because we haven't implemented the variables yet.
+> You should see no changes planned because we haven't implemented the variables yet.
 
 ### 3. Update Main Configuration to Use Variables
 
@@ -121,7 +121,7 @@ Run a plan to see how these variables affect our configuration:
 terraform plan
 ```
 
-You should see no changes planned because our variable values match our current configuration. We just simply moved them from hardcoded values to being declared in our variable definition.
+> You should see no changes planned because our variable values match our current configuration. We just simply moved them from hardcoded values to being declared in our variable definition.
 
 ### 4. Create terraform.tfvars
 

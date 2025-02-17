@@ -39,9 +39,9 @@ export GITHUB_TOKEN="your_personal_access_token"
 
 ### 3. Add Resource Configuration
 
-Open main.tf and add the following configuration (purposely not written in HCL canonical style):
+Open `main.tf` and add the following configuration (purposely not written in HCL canonical style):
 
-```bash
+```hcl
 # Create the repository
 resource "github_repository" "example" {
   name = "terraform-example"
@@ -92,15 +92,15 @@ Apply the configuration to create the resources:
 terraform apply
 ```
 
-Review the proposed changes and type 'yes' when prompted to confirm.
+Review the proposed changes and type `yes` when prompted to confirm.
 
 ### 7. Verify the Resources
 
 Let's verify our resources in the GitHub web interface:
 
-1. Open your web browser and navigate to GitHub.com
+1. Open your web browser and navigate to `GitHub.com`
 2. Go to your repositories list
-3. You should see the new "terraform-example" repository
+3. You should see the new `terraform-example` repository
 4. Click into the repository to verify:
    - The repository description
    - The enabled features (Issues, Discussions, Wiki)
@@ -111,9 +111,9 @@ Let's verify our resources in the GitHub web interface:
 
 ### 8. Update the Repository Settings
 
-In the main.tf file, update the repository configuration:
+In the `main.tf` file, update the repository configuration:
 
-```bash
+```hcl
 resource "github_repository" "terraform" {
   name        = "terraform-course-repo"
   description = "Updated repository description"  # <-- change description
@@ -162,13 +162,13 @@ Apply the configuration to update the repository:
 terraform apply
 ```
 
-Review the proposed changes and type 'yes' when prompted to confirm.
+Review the proposed changes and type `yes` when prompted to confirm.
 
 ### 11. Update the Branch Protection
 
-In the main.tf file, update the branch protection configuration:
+In the `main.tf` file, update the branch protection configuration:
 
-```bash
+```hcl
 resource "github_branch_protection" "main" {
   repository_id = github_repository.terraform.node_id
   pattern       = "main"
@@ -187,7 +187,7 @@ terraform plan
 ```
 
 The plan output will show that Terraform will update the branch protection rule:
-- Required reviewers will be increased to 2
+- Required reviewers will be increased to `2`
 
 ### 13. Apply the Configuration
 
@@ -196,17 +196,17 @@ Apply the configuration to update the branch protection:
 terraform apply
 ```
 
-Review the proposed changes and type 'yes' when prompted to confirm.
+Review the proposed changes and type `yes` when prompted to confirm.
 
 ## Verification Steps
 
 Confirm that:
 1. The resources exist in your GitHub account with:
-   - Repository named "terraform-course-repo"
+   - Repository named `terraform-course-repo`
    - Updated description and topics
    - Wiki disabled
-   - Branch protection requiring 2 reviewers
-2. A terraform.tfstate file exists in your directory
+   - Branch protection requiring `2` reviewers
+2. A `terraform.tfstate` file exists in your directory
 3. All Terraform commands completed successfully
 
 ## Success Criteria
@@ -214,13 +214,13 @@ Your lab is successful if:
 - GitHub credentials are properly configured using environment variables
 - The resources are successfully created with all specified configurations
 - All Terraform commands execute without errors
-- The terraform.tfstate file accurately reflects your infrastructure
+- The `terraform.tfstate` file accurately reflects your infrastructure
 - The resources are successfully destroyed during cleanup
 
 ## Additional Exercises
 1. Try changing other repository settings (e.g., merge options)
 2. Add additional branch protection rules
-3. Review the terraform.tfstate file to understand how Terraform tracks resource state
+3. Review the `terraform.tfstate` file to understand how Terraform tracks resource state
 
 ## Common Issues and Solutions
 
