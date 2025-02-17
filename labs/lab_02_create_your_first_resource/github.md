@@ -11,14 +11,6 @@ In this lab, you will create your first GitHub resources using Terraform: a repo
 - GitHub Personal Access Token (with repo and admin:org permissions)
 - Completion of LAB-01-GH
 
-## How to Use This Hands-On Lab
-
-1. **Create a Codespace** from this repo (click the button below).  
-2. Once the Codespace is running, open the integrated terminal.
-3. Follow the instructions in each **lab** to complete the exercises.
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
-
 ## Estimated Time
 20 minutes
 
