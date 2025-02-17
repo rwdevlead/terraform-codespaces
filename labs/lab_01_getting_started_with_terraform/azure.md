@@ -52,7 +52,7 @@ touch main.tf variables.tf providers.tf
 You can also just create these in VSCode by right-clicking the directory.
 
 Your directory structure should look like this:
-```
+```bash
 labs/
 └── terraform/
     ├── main.tf
@@ -101,7 +101,7 @@ terraform validate
 ```
 
 Expected output:
-```
+```bash
 Success! The configuration is valid.
 ```
 
@@ -122,7 +122,7 @@ terraform init
 ```
 
 You should see an error message similar to:
-```
+```bash
 Error: Unsupported Terraform Core version
 
 This configuration requires Terraform version >= 99.0.0, but the current version

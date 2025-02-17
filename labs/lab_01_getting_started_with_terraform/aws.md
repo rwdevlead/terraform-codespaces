@@ -173,7 +173,7 @@ Expected output: You should now see success messages indicating proper initializ
 After completing the lab, verify your work:
 
 1. Your directory structure should look like this:
-```
+```bash
 labs/
 └── terraform/
     ├── .terraform/

@@ -47,7 +47,7 @@ variable "vpc_cidr" {
 variable "environment" {
   description = "Environment name for tagging"
   type        = string
-  default     = "learning-terraform"  # Matches our current environment
+  default     = "learning-terraform"
 }
 ```
 
@@ -56,7 +56,7 @@ Run a plan to see the current state:
 terraform plan
 ```
 
-You should see no changes planned because we haven't implemented the variables yet.
+> You should see no changes planned because we haven't implemented the variables yet.
 
 ### 3. Update Main Configuration to Use Variables
 
@@ -81,7 +81,7 @@ Run a plan to see how these variables affect our configuration:
 terraform plan
 ```
 
-You should see no changes planned because our variable values match our current configuration. But at least now some values are set using variables instead of being hardcoded.
+> You should see no changes planned because our variable values match our current configuration. But at least now some values are set using variables instead of being hardcoded.
 
 ### 4. Create terraform.tfvars
 
@@ -161,7 +161,7 @@ terraform apply
 
 Review the proposed changes and type `yes` when prompted to confirm.
 
-Notice how Terraform applies the default tags as part of the provider for every resource using that provider, but it also adds the tags added to the specific resource as well. This is a great way to easily standardize tags for ALL resources in your environment.
+> Notice how Terraform applies the default tags as part of the provider for every resource using that provider, but it also adds the tags added to the specific resource as well. This is a great way to easily standardize tags for ALL resources in your environment.
 
 ### 6. Add Output Definitions
 

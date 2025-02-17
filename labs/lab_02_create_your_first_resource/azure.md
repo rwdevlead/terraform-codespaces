@@ -42,9 +42,9 @@ export ARM_TENANT_ID="your_tenant_id"
 
 ### 3. Add Resource Configuration
 
-Open main.tf and add the following configuration (purposely not written in HCL canonical style):
+Open `main.tf` and add the following configuration (purposely not written in HCL canonical style):
 
-```bash
+```hcl
 # Create the resource group
 resource "azurerm_resource_group" "main" {
   name = "terraform-course"
@@ -91,7 +91,7 @@ terraform plan
 
 The plan output will show that Terraform intends to create:
 - A new resource group in East US
-- A virtual network with address space 10.0.0.0/16
+- A virtual network with address space `10.0.0.0/16`
 - Both resources will have the specified tags
 
 ### 6. Apply the Configuration
@@ -121,9 +121,9 @@ Let's verify our resources in the Azure Portal:
 
 ### 8. Update the Virtual Network
 
-In the main.tf file, update the virtual network configuration:
+In the `main.tf` file, update the virtual network configuration:
 
-```bash
+```hcl
 resource "azurerm_virtual_network" "main" {
   name                = "terraform-network"
   resource_group_name = azurerm_resource_group.main.name
@@ -145,7 +145,7 @@ terraform plan
 ```
 
 The plan output will show that Terraform will update the virtual network in-place:
-- The address space will be updated to 192.168.0.0/16
+- The address space will be updated to `192.168.0.0/16`
 
 ### 10. Apply the Configuration
 
@@ -158,9 +158,9 @@ Review the proposed changes and type `yes` when prompted to confirm.
 
 ### 11. Update the Tags
 
-In the main.tf file, update both resources' tags:
+In the `main.tf` file, update both resource tags:
 
-```bash
+```hcl
   tags = {
     Environment = "learning-terraform"  # <-- change tag here
     Managed_By  = "Terraform"
