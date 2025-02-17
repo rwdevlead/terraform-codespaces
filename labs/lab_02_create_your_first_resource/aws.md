@@ -96,7 +96,7 @@ Apply the configuration to create the VPC:
 terraform apply
 ```
 
-Review the proposed changes and type 'yes' when prompted to confirm.
+Review the proposed changes and type `yes` when prompted to confirm.
 
 ### 7. Verify the Resource
 
@@ -155,7 +155,7 @@ Apply the configuration to create the VPC:
 terraform apply
 ```
 
-Review the proposed changes and type 'yes' when prompted to confirm.
+Review the proposed changes and type `yes` when prompted to confirm.
 
 ### 11. Update the Tags on the VPC
 
@@ -207,7 +207,7 @@ Apply the configuration to create the VPC:
 terraform apply
 ```
 
-Review the proposed changes and type 'yes' when prompted to confirm.
+Review the proposed changes and type `yes` when prompted to confirm.
 
 ## Verification Steps
 
