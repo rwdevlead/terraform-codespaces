@@ -11,14 +11,6 @@ In this lab, you will create your first Azure resources using Terraform: a Resou
 - Azure account with appropriate permissions
 - Completion of LAB-01-AZ
 
-## How to Use This Hands-On Lab
-
-1. **Create a Codespace** from this repo (click the button below).  
-2. Once the Codespace is running, open the integrated terminal.
-3. Follow the instructions in each **lab** to complete the exercises.
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
-
 ## Estimated Time
 20 minutes
 
