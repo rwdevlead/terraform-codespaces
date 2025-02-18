@@ -1,15 +1,13 @@
-# Dockerfile
-FROM hashicorp/terraform:latest
+# Use Ubuntu as the base image
+FROM ubuntu:latest
 
-
-# Install dependencies for AWS CLI and Azure CLI
-RUN apk add --no-cache git zsh curl bash unzip aws-cli python3 py3-pip
-
-# Allow pip to install packages by disabling the externally managed environment restriction
-ENV PIP_BREAK_SYSTEM_PACKAGES=1
-
-# Install Azure CLI via pip
-RUN pip install --no-cache-dir azure-cli
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    curl bash unzip git zsh software-properties-common \
+    && curl -fsSL https://apt.releases.hashicorp.com/gpg | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list \
+    && apt-get update && apt-get install -y terraform awscli \
+    && curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 # Install Oh My Zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
