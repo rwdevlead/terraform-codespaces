@@ -1,19 +1,24 @@
 FROM rockylinux:9-minimal
 
-# Install required packages
+# Install minimal required packages
 RUN microdnf install -y \
-    python3-pip \
     unzip \
     git \
     curl \
     jq \
     && microdnf clean all
 
-# Install AWS CLI
-RUN pip3 install --no-cache-dir awscli
+# Install AWS CLI v2 (binary version)
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf aws awscliv2.zip
 
-# Install Azure CLI
-RUN pip3 install --no-cache-dir azure-cli
+# Install Azure CLI (RPM direct installation)
+RUN microdnf install -y dnf && \
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
+    dnf install -y https://packages.microsoft.com/config/rhel/9.0/packages-microsoft-prod.rpm && \
+    dnf install -y azure-cli
 
 # Install latest version of Terraform
 RUN LATEST_VERSION=$(curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r '.tag_name' | sed 's/v//') && \
