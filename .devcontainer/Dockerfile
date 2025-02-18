@@ -1,24 +1,7 @@
-FROM almalinux:9
+FROM btkrausen/terraform-tools:latest
 
-# Install EPEL repository and base dependencies
-RUN dnf install -y epel-release && \
-    dnf install -y \
-    unzip \
-    git \
-    python3-pip \
-    && dnf clean all
+# Install HashiCorp GPG key and repository
+RUN rpm --import https://rpm.releases.hashicorp.com/gpg && \
+    dnf config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
 
-# Install AWS CLI v2
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
-    unzip awscliv2.zip && \
-    ./aws/install && \
-    rm -rf aws awscliv2.zip
-
-# Install Microsoft repository and Azure CLI
-RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
-    dnf install -y https://packages.microsoft.com/config/rhel/9.0/packages-microsoft-prod.rpm && \
-    dnf install -y azure-cli && \
-    dnf clean all
-
-# Create workspace directory
 WORKDIR /workspace
