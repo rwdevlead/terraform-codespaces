@@ -1,19 +1,46 @@
-# Use Debian as the base image (or Ubuntu)
-FROM debian:latest
+FROM ubuntu:22.04
 
-# Install required dependencies
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary dependencies and tools
 RUN apt-get update && apt-get install -y \
-    curl bash unzip git zsh software-properties-common lsb-release gnupg2 ca-certificates
+    curl \
+    unzip \
+    gnupg \
+    software-properties-common \
+    git \
+    ca-certificates \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
 
-# Add HashiCorp's official GPG key and repo
-RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+# Install HashiCorp GPG key and add HashiCorp repository
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 
-# Update package lists and install Terraform & AWS CLI
-RUN apt-get update && apt-get install -y terraform awscli
+# Install Terraform
+RUN apt-get update && apt-get install -y terraform \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf aws awscliv2.zip
+
+# Install Microsoft signing key and repository
+RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/azure-cli.list
 
 # Install Azure CLI
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+RUN apt-get update && apt-get install -y azure-cli \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Oh My Zsh
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# Verify installations
+RUN terraform --version \
+    && aws --version \
+    && az --version \
+    && git --version
+
+# Set working directory
+WORKDIR /workspace
