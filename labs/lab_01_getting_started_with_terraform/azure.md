@@ -71,7 +71,7 @@ terraform {
   required_version = ">= 1.10.x"  # Replace with your installed version
   required_providers {
     azurerm = {
-      source  = "hashicorp/azurerm"
+      source = "hashicorp/azurerm"
       version = "~> 3.0"
     }
   }
@@ -93,6 +93,29 @@ terraform fmt
 Expected output: If any files were formatted, their names will be listed. If no formatting was needed, there will be no output.
 
 ### 5. Validate the Configuration
+ Initialize the working directory to prep the environment and download the provider:
+
+ ```bash
+ terraform init
+ ```
+
+Expected output:
+```bash
+➜  terraform git:(main) ✗ terraform init
+Initializing the backend...
+Initializing provider plugins...
+- Finding hashicorp/azurerm versions matching "~> 3.0"...
+- Installing hashicorp/azurerm v3.117.0...
+- Installed hashicorp/azurerm v3.117.0 (signed by HashiCorp)
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+```
+
+### 6. Validate the Configuration
 
 Run the validation command to check for syntax errors:
 
@@ -105,7 +128,7 @@ Expected output:
 Success! The configuration is valid.
 ```
 
-### 6. Test Version Constraints
+### 7. Test Version Constraints
 
 Let's experiment with version constraints:
 
