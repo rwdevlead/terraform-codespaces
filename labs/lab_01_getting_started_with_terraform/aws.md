@@ -128,7 +128,7 @@ Expected output:
 Success! The configuration is valid.
 ```
 
-### 6. Test Version Constraints
+### 7. Test Version Constraints
 
 Let's experiment with version constraints:
 
