@@ -87,4 +87,4 @@ If you’d like to add more labs or improve these, feel free to fork this repo o
 
 ---
 
-Enjoy your journey with Vault!
+Enjoy your journey with Terraform!
