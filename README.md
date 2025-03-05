@@ -18,8 +18,6 @@ Welcome to this HashiCorp Terraform lab repo, where you can get hands-on experie
 
 ### Built with:
 
-[![Github Sponsor](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=Terraform&logoColor=white)](https://terraform.io)
-
 <a href="https://terraform.io"> <img alt="terraform" src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=Terraform&logoColor=white" width="120" height="30" /></a>
 <a href="https://github.com/features/codespaces"> <img alt="Codespaces" src="https://img.shields.io/badge/GitHub-%23121011.svg?style=flat-square&logo=Github&logoColor=white" width="100" height="30" /></a>
 <a href="https://aws.amazon.com"> <img alt="Amazon Web Services" src="https://img.shields.io/badge/AWS-%23FF9900.svg?style=flat-square&logo=amazon-aws&logoColor=white" width="60" height="30"/></a>
