@@ -18,11 +18,13 @@ Welcome to this HashiCorp Terraform lab repo, where you can get hands-on experie
 
 ### Built with:
 
-<a href="https://terraform.io"> <img alt="terraform" src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=Terraform&logoColor=white" width="120" height="30" />
-<a href="https://github.com/features/codespaces"> <img alt="Codespaces" src="https://img.shields.io/badge/GitHub-%23121011.svg?style=flat-square&logo=Github&logoColor=white" width="100" height="30" />
-<a href="https://aws.amazon.com"> <img alt="Amazon Web Services" src="https://img.shields.io/badge/AWS-%23FF9900.svg?style=flat-square&logo=amazon-aws&logoColor=white" width="60" height="30"/>
-<a href="https://portal.azure.com"> <img alt="Azure" src="https://img.shields.io/badge/Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white" width="120" height="30"/>
-<a href="https://code.visualstudio.com/"> <img alt="VSCode" src="https://img.shields.io/badge/Visual_Studio-5C2D91?style=for-the-badge&logo=visual%20studio%20code&logoColor=white" width="120" height="30"/>
+[![Github Sponsor](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=Terraform&logoColor=white)](https://terraform.io)
+
+<a href="https://terraform.io"> <img alt="terraform" src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=Terraform&logoColor=white" width="120" height="30" /></a>
+<a href="https://github.com/features/codespaces"> <img alt="Codespaces" src="https://img.shields.io/badge/GitHub-%23121011.svg?style=flat-square&logo=Github&logoColor=white" width="100" height="30" /></a>
+<a href="https://aws.amazon.com"> <img alt="Amazon Web Services" src="https://img.shields.io/badge/AWS-%23FF9900.svg?style=flat-square&logo=amazon-aws&logoColor=white" width="60" height="30"/></a>
+<a href="https://portal.azure.com"> <img alt="Azure" src="https://img.shields.io/badge/Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white" width="120" height="30"/></a>
+<a href="https://code.visualstudio.com/"> <img alt="VSCode" src="https://img.shields.io/badge/Visual_Studio-5C2D91?style=for-the-badge&logo=visual%20studio%20code&logoColor=white" width="120" height="30"/></a>
 
 </a>
 
