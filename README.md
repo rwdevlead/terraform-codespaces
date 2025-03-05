@@ -40,7 +40,7 @@ Below are differents labs you can explore. Each link points to a specific lab fi
 
 Each lab is available in AWS, Azure, or GitHub - allowing you to choose the platform you're most comfortable with to learn.
 
-## HashiCorp Terraform Basics 💻
+## 💻 HashiCorp Terraform Basics 💻
 
 | **#** | **Lab**                                           |                               **AWS**                               |                                **Azure**                                |                                **GitHub**                                 |
 | :---: | ------------------------------------------------- | :-----------------------------------------------------------------: | :---------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
@@ -51,7 +51,7 @@ Each lab is available in AWS, Azure, or GitHub - allowing you to choose the plat
 |   5   | **Working with State, Data Sources, and the CLI** | [AWS](./labs/lab_05_working_with_state_data_sources_and_cli/aws.md) | [Azure](./labs/lab_05_working_with_state_data_sources_and_cli/azure.md) | [GitHub](./labs/lab_05_working_with_state_data_sources_and_cli/github.md) |
 
 
-## Making Code More Dyanmic and Reusable ✨
+## ✨ Making Code More Dyanmic and Reusable ✨
 
 | **#** | **Lab**                                              |                                    **AWS**                                     |                                      **Azure**                                       |                                       **GitHub**                                        |
 | :---: | ---------------------------------------------------- | :----------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------: |
@@ -65,7 +65,7 @@ Each lab is available in AWS, Azure, or GitHub - allowing you to choose the plat
 |  13   | **Using Terraform Built-In Functions**               |       [AWS](./labs/lab_13_using_terraform_built_in_functions/AWS/aws.md)       |       [Azure](./labs/lab_13_using_terraform_built_in_functions/AZURE/azure.md)       |       [GitHub](./labs/lab_13_using_terraform_built_in_functions/GITHUB/github.md)       |
 
 
-## Working with Terraform Modules
+## ⚙️ Working with Terraform Modules ⚙️
 
 | **#** | **Lab**                                     |                           **AWS**                            |                             **Azure**                              |                              **GitHub**                               |
 | :---: | ------------------------------------------- | :----------------------------------------------------------: | :----------------------------------------------------------------: | :-------------------------------------------------------------------: |
