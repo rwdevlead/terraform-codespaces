@@ -62,7 +62,7 @@ provider "aws" {
 
 ### 4. Create the Variables File
 
-Add the following content to `variables.tf`:
+Add the following content to `variables.tf` if ti doesn't yet exist:
 
 ```hcl
 variable "region" {
@@ -76,7 +76,6 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
-```
 ```
 
 ### 5. Create the IAM Policy Module
