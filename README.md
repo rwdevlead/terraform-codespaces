@@ -90,7 +90,7 @@ These labs are fully self-contained and can be completed in any order.
 |  18   | Importing an Existing Resource | Coming Soon | Coming Soon | Coming Soon |
 |  19   | Migrating State to a New Backend | Coming Soon | Coming Soon | Coming Soon |
 |  20   | Using Terraform Workspaces | Coming Soon | Coming Soon | Coming Soon |
-|  21   | Using Terraform Logging to Troubleshoot Issues | Coming Soon | Coming Soon | Coming Soon |
+|  21   | Using Terraform Logging | Coming Soon | Coming Soon | Coming Soon |
 <br/>
 
 ---
