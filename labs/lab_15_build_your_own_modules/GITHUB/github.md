@@ -15,6 +15,14 @@ Note: A GitHub personal access token is required for this lab. Make sure it has 
 - `repo` (Full control of private repositories)
 - `admin:org` (Full control of orgs and teams, read and write org projects)
 
+## How to Use This Hands-On Lab
+
+1. **Create a Codespace** from this repo (click the button below).  
+2. Once the Codespace is running, open the integrated terminal.
+3. Follow the instructions in each **lab** to complete the exercises.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
+
 ## Estimated Time
 40 minutes
 

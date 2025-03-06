@@ -12,6 +12,14 @@ In this lab, you will learn how to use a few essential Terraform built-in functi
 
 Note: Azure credentials are required for this lab.
 
+## How to Use This Hands-On Lab
+
+1. **Create a Codespace** from this repo (click the button below).  
+2. Once the Codespace is running, open the integrated terminal.
+3. Follow the instructions in each **lab** to complete the exercises.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
+
 ## Estimated Time
 20 minutes
 
