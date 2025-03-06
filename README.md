@@ -24,8 +24,6 @@ Welcome to this HashiCorp Terraform lab repo, where you can get hands-on experie
 <a href="https://portal.azure.com"> <img alt="Azure" src="https://img.shields.io/badge/Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white" width="120" height="30"/></a>
 <a href="https://code.visualstudio.com/"> <img alt="VSCode" src="https://img.shields.io/badge/Visual_Studio-5C2D91?style=for-the-badge&logo=visual%20studio%20code&logoColor=white" width="120" height="30"/></a>
 
-</a>
-
 ## How to Use
 
 1. **Create a Codespace** from this repo (click the button below or go to the “Code” drop-down, select “Codespaces,” and create a new one).
@@ -41,43 +39,49 @@ Below are different labs you can explore. Each link points to a specific lab fil
 Each lab is available in AWS, Azure, or GitHub - allowing you to choose the platform you're most comfortable with to learn.
 
 ## 💻 HashiCorp Terraform Basics 💻
+Labs 1 through 5 are designed to be completed in order as each builds on the previous lab.
 
 | **#** | **Lab**                                           |                               **AWS**                               |                                **Azure**                                |                                **GitHub**                                 |
-| :---: | ------------------------------------------------- | :-----------------------------------------------------------------: | :---------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
-|   1   | **Getting Started with Terraform**                |     [AWS](./labs/lab_01_getting_started_with_terraform/aws.md)      |     [Azure](./labs/lab_01_getting_started_with_terraform/azure.md)      |     [GitHub](./labs/lab_01_getting_started_with_terraform/github.md)      |
-|   2   | **Create Your First Resource**                    |       [AWS](./labs/lab_02_create_your_first_resource/aws.md)        |       [Azure](./labs/lab_02_create_your_first_resource/azure.md)        |       [GitHub](./labs/lab_02_create_your_first_resource/github.md)        |
-|   3   | **Working with Variables and Dependencies**       | [AWS](./labs/lab_03_working_with_variables_and_dependencies/aws.md) | [Azure](./labs/lab_03_working_with_variables_and_dependencies/azure.md) | [GitHub](./labs/lab_03_working_with_variables_and_dependencies/github.md) |
-|   4   | **Managing Mulitple Resources**                   |       [AWS](./labs/lab_04_managing_mulitple_resources/aws.md)       |       [Azure](./labs/lab_04_managing_mulitple_resources/azure.md)       |       [GitHub](./labs/lab_04_managing_mulitple_resources/github.md)       |
-|   5   | **Working with State, Data Sources, and the CLI** | [AWS](./labs/lab_05_working_with_state_data_sources_and_cli/aws.md) | [Azure](./labs/lab_05_working_with_state_data_sources_and_cli/azure.md) | [GitHub](./labs/lab_05_working_with_state_data_sources_and_cli/github.md) |
+| :---: | :------------------------------------------------- | :-----------------------------------------------------------------: | :---------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
+|   1   | Getting Started with Terraform                |     [AWS](./labs/lab_01_getting_started_with_terraform/aws.md)      |     [Azure](./labs/lab_01_getting_started_with_terraform/azure.md)      |     [GitHub](./labs/lab_01_getting_started_with_terraform/github.md)      |
+|   2   | Create Your First Resource                    |       [AWS](./labs/lab_02_create_your_first_resource/aws.md)        |       [Azure](./labs/lab_02_create_your_first_resource/azure.md)        |       [GitHub](./labs/lab_02_create_your_first_resource/github.md)        |
+|   3   | Working with Variables and Dependencies       | [AWS](./labs/lab_03_working_with_variables_and_dependencies/aws.md) | [Azure](./labs/lab_03_working_with_variables_and_dependencies/azure.md) | [GitHub](./labs/lab_03_working_with_variables_and_dependencies/github.md) |
+|   4   | Managing Mulitple Resources                  |       [AWS](./labs/lab_04_managing_mulitple_resources/aws.md)       |       [Azure](./labs/lab_04_managing_mulitple_resources/azure.md)       |       [GitHub](./labs/lab_04_managing_mulitple_resources/github.md)       |
+|   5   | Working with State, Data Sources, and the CLI | [AWS](./labs/lab_05_working_with_state_data_sources_and_cli/aws.md) | [Azure](./labs/lab_05_working_with_state_data_sources_and_cli/azure.md) | [GitHub](./labs/lab_05_working_with_state_data_sources_and_cli/github.md) |
 
+<br/>
 
 ## ✨ Making Code More Dynamic and Reusable ✨
-
+These labs are fully self-contained and can be completed in any order.
 | **#** | **Lab**                                              |                                    **AWS**                                     |                                      **Azure**                                       |                                       **GitHub**                                        |
-| :---: | ---------------------------------------------------- | :----------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------: |
-|   6   | **Making Code Dynamic and Reusable**                 |        [AWS](./labs/lab_06_making_code_dynamic_and_reusable/AWS/aws.md)        |        [Azure](./labs/lab_06_making_code_dynamic_and_reusable/AZURE/azure.md)        |        [GitHub](./labs/lab_06_making_code_dynamic_and_reusable/GITHUB/github.md)        |
-|   7   | **Simplify Code with `Local` Values**                |        [AWS](./labs/lab_07_simplify_code_with_local_values/AWS/aws.md)         |        [Azure](./labs/lab_07_simplify_code_with_local_values/AZURE/azure.md)         |        [GitHub](./labs/lab_07_simplify_code_with_local_values/GITHUB/github.md)         |
-|   8   | **Create Mulitple Resources with `count`**           |      [AWS](./labs/lab_08_create_mulitple_resources_with_count/AWS/aws.md)      |      [Azure](./labs/lab_08_create_mulitple_resources_with_count/AZURE/azure.md)      |     [GitHub](./labs/lab_08_create_mulitple_resources_with_count/GITHUB/github.md\*)     |
-|   9   | **Deploy Mulitple Resources with `for_each`**        |   [AWS](./labs/lab_09_deploying_mulitple_resources_with_for_each/AWS/aws.md)   |   [Azure](./labs/lab_09_deploying_mulitple_resources_with_for_each/AZURE/azure.md)   |   [GitHub](./labs/lab_09_deploying_mulitple_resources_with_for_each/GITHUB/github.md)   |
-|  10   | **Managing Explicit Dependencies with `depends_on`** | [AWS](./labs/lab_10_managing_explicit_dependencies_with_depends_on/AWS/aws.md) | [Azure](./labs/lab_10_managing_explicit_dependencies_with_depends_on/AZURE/azure.md) | [GitHub](./labs/lab_10_managing_explicit_dependencies_with_depends_on/GITHUB/github.md) |
-|  11   | **Using Multiple Providers for Mulitple Regions**    | [AWS](./labs/lab_11_using_multiple_providers_for_mulitple_regions/AWS/aws.md)  | [Azure](./labs/lab_11_using_multiple_providers_for_mulitple_regions/AZURE/azure.md)  | [GitHub](./labs/lab_11_using_multiple_providers_for_mulitple_regions/GITHUB/github.md)  |
-|  12   | **Managing Resource Lifecycle using `lifecycle`**    |   [AWS](./labs/lab_12_managing_resource_lifecycle_using_lifecyle/AWS/aws.md)   |   [Azure](./labs/lab_12_managing_resource_lifecycle_using_lifecyle/AZURE/azure.md)   |   [GitHub](./labs/lab_12_managing_resource_lifecycle_using_lifecyle/GITHUB/github.md)   |
-|  13   | **Using Terraform Built-In Functions**               |       [AWS](./labs/lab_13_using_terraform_built_in_functions/AWS/aws.md)       |       [Azure](./labs/lab_13_using_terraform_built_in_functions/AZURE/azure.md)       |       [GitHub](./labs/lab_13_using_terraform_built_in_functions/GITHUB/github.md)       |
+| :---: | :---------------------------------------------------- | :----------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------: |
+|   6   | Making Code Dynamic and Reusable                 |        [AWS](./labs/lab_06_making_code_dynamic_and_reusable/AWS/aws.md)        |        [Azure](./labs/lab_06_making_code_dynamic_and_reusable/AZURE/azure.md)        |        [GitHub](./labs/lab_06_making_code_dynamic_and_reusable/GITHUB/github.md)        |
+|   7   | Simplify Code with `Local` Values                |        [AWS](./labs/lab_07_simplify_code_with_local_values/AWS/aws.md)         |        [Azure](./labs/lab_07_simplify_code_with_local_values/AZURE/azure.md)         |        [GitHub](./labs/lab_07_simplify_code_with_local_values/GITHUB/github.md)         |
+|   8   | Create Mulitple Resources with `count`           |      [AWS](./labs/lab_08_create_mulitple_resources_with_count/AWS/aws.md)      |      [Azure](./labs/lab_08_create_mulitple_resources_with_count/AZURE/azure.md)      |     [GitHub](./labs/lab_08_create_mulitple_resources_with_count/GITHUB/github.md\*)     |
+|   9   | Deploy Mulitple Resources with `for_each`        |   [AWS](./labs/lab_09_deploying_mulitple_resources_with_for_each/AWS/aws.md)   |   [Azure](./labs/lab_09_deploying_mulitple_resources_with_for_each/AZURE/azure.md)   |   [GitHub](./labs/lab_09_deploying_mulitple_resources_with_for_each/GITHUB/github.md)   |
+|  10   | Managing Explicit Dependencies with `depends_on` | [AWS](./labs/lab_10_managing_explicit_dependencies_with_depends_on/AWS/aws.md) | [Azure](./labs/lab_10_managing_explicit_dependencies_with_depends_on/AZURE/azure.md) | [GitHub](./labs/lab_10_managing_explicit_dependencies_with_depends_on/GITHUB/github.md) |
+|  11   | Using Multiple Providers for Mulitple Regions    | [AWS](./labs/lab_11_using_multiple_providers_for_mulitple_regions/AWS/aws.md)  | [Azure](./labs/lab_11_using_multiple_providers_for_mulitple_regions/AZURE/azure.md)  | [GitHub](./labs/lab_11_using_multiple_providers_for_mulitple_regions/GITHUB/github.md)  |
+|  12   | Managing Resource Lifecycle using `lifecycle`    |   [AWS](./labs/lab_12_managing_resource_lifecycle_using_lifecyle/AWS/aws.md)   |   [Azure](./labs/lab_12_managing_resource_lifecycle_using_lifecyle/AZURE/azure.md)   |   [GitHub](./labs/lab_12_managing_resource_lifecycle_using_lifecyle/GITHUB/github.md)   |
+|  13   | Using Terraform Built-In Functions               |       [AWS](./labs/lab_13_using_terraform_built_in_functions/AWS/aws.md)       |       [Azure](./labs/lab_13_using_terraform_built_in_functions/AZURE/azure.md)       |       [GitHub](./labs/lab_13_using_terraform_built_in_functions/GITHUB/github.md)       |
 
+<br/>
 
 ## ⚙️ Working with Terraform Modules ⚙️
+These labs are fully self-contained and can be completed in any order.
 
 | **#** | **Lab**                                     |                           **AWS**                            |                             **Azure**                              |                              **GitHub**                               |
-| :---: | ------------------------------------------- | :----------------------------------------------------------: | :----------------------------------------------------------------: | :-------------------------------------------------------------------: |
-|   14   | **Using Modules in the Terraform Registry** | [AWS](./labs/lab_14_using_the_terraform_registry/AWS/aws.md) | [Azure](./labs/lab_14_using_the_terraform_registry/AZURE/azure.md) | [GitHub](./labs/lab_14_using_the_terraform_registry/GITHUB/github.md) |
-|   15  | **Build Your Own Local Modules**            |    [AWS](./labs/lab_15_build_your_own_modules/AWS/aws.md)    |    [Azure](./labs/lab_15_build_your_own_modules/AZURE/azure.md)    |    [GitHub](./labs/lab_15_build_your_own_modules/GITHUB/github.md)    |
+| :---: | :------------------------------------------- | :----------------------------------------------------------: | :----------------------------------------------------------------: | :-------------------------------------------------------------------: |
+|   14   | Using Modules in the Terraform Registry | [AWS](./labs/lab_14_using_the_terraform_registry/AWS/aws.md) | [Azure](./labs/lab_14_using_the_terraform_registry/AZURE/azure.md) | [GitHub](./labs/lab_14_using_the_terraform_registry/GITHUB/github.md) |
+|   15  | Build Your Own Local Modules            |    [AWS](./labs/lab_15_build_your_own_modules/AWS/aws.md)    |    [Azure](./labs/lab_15_build_your_own_modules/AZURE/azure.md)    |    [GitHub](./labs/lab_15_build_your_own_modules/GITHUB/github.md)    |
+
+<br/>
 
 ## Managing and Maintaining Your Terraform Code
+These labs are fully self-contained and can be completed in any order.
 
 ### More labs coming soon!
 
-
-
+<br/>
 
 ---
 
