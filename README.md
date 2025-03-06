@@ -32,11 +32,11 @@ Welcome to this HashiCorp Terraform lab repo, where you can get hands-on experie
 2. Once the Codespace is running, open the integrated terminal.
 3. Follow the instructions in each **lab** to complete the exercises.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/vault-codespaces)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
 
 ## Labs Overview
 
-Below are differents labs you can explore. Each link points to a specific lab file or folder within this repository.
+Below are different labs you can explore. Each link points to a specific lab file or folder within this repository.
 
 Each lab is available in AWS, Azure, or GitHub - allowing you to choose the platform you're most comfortable with to learn.
 
@@ -51,7 +51,7 @@ Each lab is available in AWS, Azure, or GitHub - allowing you to choose the plat
 |   5   | **Working with State, Data Sources, and the CLI** | [AWS](./labs/lab_05_working_with_state_data_sources_and_cli/aws.md) | [Azure](./labs/lab_05_working_with_state_data_sources_and_cli/azure.md) | [GitHub](./labs/lab_05_working_with_state_data_sources_and_cli/github.md) |
 
 
-## ✨ Making Code More Dyanmic and Reusable ✨
+## ✨ Making Code More Dynamic and Reusable ✨
 
 | **#** | **Lab**                                              |                                    **AWS**                                     |                                      **Azure**                                       |                                       **GitHub**                                        |
 | :---: | ---------------------------------------------------- | :----------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------: |
@@ -72,7 +72,7 @@ Each lab is available in AWS, Azure, or GitHub - allowing you to choose the plat
 |   14   | **Using Modules in the Terraform Registry** | [AWS](./labs/lab_14_using_the_terraform_registry/AWS/aws.md) | [Azure](./labs/lab_14_using_the_terraform_registry/AZURE/azure.md) | [GitHub](./labs/lab_14_using_the_terraform_registry/GITHUB/github.md) |
 |   15  | **Build Your Own Local Modules**            |    [AWS](./labs/lab_15_build_your_own_modules/AWS/aws.md)    |    [Azure](./labs/lab_15_build_your_own_modules/AZURE/azure.md)    |    [GitHub](./labs/lab_15_build_your_own_modules/GITHUB/github.md)    |
 
-## Managing and Maintaing Your Terraform Code
+## Managing and Maintaining Your Terraform Code
 
 ### More labs coming soon!
 
