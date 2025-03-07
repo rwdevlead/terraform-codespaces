@@ -79,7 +79,7 @@ These labs are fully self-contained and can be completed in any order.
 
 <br/>
 
-## Managing and Maintaining Your Terraform Code
+## 🔧 Managing and Maintaining Your Terraform Code 🔧
 
 These labs are fully self-contained and can be completed in any order.
 
