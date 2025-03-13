@@ -126,7 +126,6 @@ Add the following variable values to the `terraform.tfvars` file to override our
 ```hcl
 vnet_address_space = ["10.0.0.0/16"]
 environment        = "development"
-location           = "westus"
 ```
 
 Run another plan:
@@ -137,7 +136,6 @@ terraform plan
 Now you should see that Terraform plans to destroy and recreate the resources because:
 - The Virtual Network address space will change from 192.168.0.0/16 to 10.0.0.0/16
 - The Environment tag will change from "learning-terraform" to "development"
-- The location will change from "eastus" to "westus"
 
 Apply the changes:
 ```bash
@@ -180,7 +178,6 @@ Create a new file named `testing.tfvars`:
 ```hcl
 vnet_address_space = ["172.16.0.0/16"]
 environment        = "testing"
-location           = "centralus"
 ```
 
 Try applying with this new variable file:
