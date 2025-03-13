@@ -135,9 +135,10 @@ resource "azurerm_virtual_network" "main" {
   location            = azurerm_resource_group.main.location
   address_space       = ["192.168.0.0/16"]  # <-- change IP Address
 
-  tags = {
+    Name        = "terraform-course"
     Environment = "Lab"
-    Managed_By  = "Terraform"
+    Managed_By = "Terraform"
+  }
   }
 }
 ```
@@ -167,6 +168,7 @@ In the `main.tf` file, update both resource tags:
 
 ```hcl
   tags = {
+    Name        = "terraform-course"
     Environment = "learning-terraform"  # <-- change tag here
     Managed_By  = "Terraform"
   }
