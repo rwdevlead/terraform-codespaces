@@ -83,11 +83,11 @@ Now modify `main.tf` to use the new variables:
 ```hcl
 resource "azurerm_resource_group" "main" {
   name     = "terraform-course"
-  location = var.location
+  location = var.location # <-- update value here
 
   tags = {
     Name        = "terraform-course"
-    Environment = var.environment
+    Environment = var.environment # <-- update value here
     Managed_By  = "Terraform"
   }
 }
@@ -96,11 +96,11 @@ resource "azurerm_virtual_network" "main" {
   name                = "terraform-network"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  address_space       = var.vnet_address_space
+  address_space       = var.vnet_address_space # <-- update value here
 
   tags = {
     Name        = "terraform-course"
-    Environment = var.environment
+    Environment = var.environment # <-- update value here
     Managed_By  = "Terraform"
   }
 }
@@ -138,62 +138,6 @@ Now you should see that Terraform plans to destroy and recreate the resources be
 - The Virtual Network address space will change from 192.168.0.0/16 to 10.0.0.0/16
 - The Environment tag will change from "learning-terraform" to "development"
 - The location will change from "eastus" to "westus"
-
-### 5. Update Provider with Default Tags
-
-Update providers.tf to include default tags:
-
-```hcl
-terraform {
-  required_version = ">= 1.10.x"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-  
-  default_tags = {
-    Managed_By = "Terraform"
-    Project    = "Terraform Training"
-  }
-}
-```
-
-Remove the `Managed_By` tag from both resources (since we moved it to provider level) by updating `main.tf`:
-
-```hcl
-resource "azurerm_resource_group" "main" {
-  name     = "terraform-course"
-  location = var.location
-
-  tags = {
-    Name        = "terraform-course"
-    Environment = var.environment
-  }
-}
-
-resource "azurerm_virtual_network" "main" {
-  name                = "terraform-network"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  address_space       = var.vnet_address_space
-
-  tags = {
-    Name        = "terraform-course"
-    Environment = var.environment
-  }
-}
-```
-
-Run another plan:
-```bash
-terraform plan
-```
 
 Apply the changes:
 ```bash
