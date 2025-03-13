@@ -21,7 +21,7 @@ Let's start by exploring some useful Terraform CLI commands:
 
 ```bash
 # View all available Terraform commands
-terraform help
+terraform --help
 
 # Get specific help about state commands
 terraform state help
@@ -198,17 +198,16 @@ terraform state show aws_vpc.development
 terraform output
 
 # Notice that sensitive outputs show as (sensitive)
-# To view sensitive outputs, use the state show command:
-terraform state show output.account_id
-terraform state show output.combined_info
+# To view sensitive outputs, use the output command:
+terraform output account_id
+terraform output combined_info
 
 # Or use the -json flag with terraform output:
 terraform output -json account_id
 ```
 
 Notice how sensitive outputs are handled differently:
-- Regular `terraform output` will show "(sensitive)" for these values
-- Using `terraform state show` or `terraform output -json` allows you to view the actual values
+- Using `terraform output -json` allows you to view the actual values
 - This helps protect sensitive information from being accidentally displayed in logs or terminal output
 
 ### 9. Clean Up All Resources
