@@ -31,13 +31,16 @@ cd labs/terraform
 
 ### 2. Configure Azure Credentials
 
-Set your Azure credentials as environment variables:
+First, authenticate with Azure:
 
 ```bash
-export ARM_CLIENT_ID="your_client_id"
-export ARM_CLIENT_SECRET="your_client_secret"
-export ARM_SUBSCRIPTION_ID="your_subscription_id"
-export ARM_TENANT_ID="your_tenant_id"
+az login
+```
+
+If you haven't authenticated before, this will open a web browser for you to sign in. After signing in, you should see your subscription information displayed in the terminal. Set your ARM_SUBSCRIPTION_ID environment variable:
+
+```bash
+export ARM_SUBSCRIPTION_ID=12345abdce
 ```
 
 ### 3. Add Resource Configuration
@@ -51,6 +54,7 @@ resource "azurerm_resource_group" "main" {
   location = "eastus"
 
   tags = {
+    Name        = "terraform-course"
     Environment = "Lab"
     Managed_By = "Terraform"
   }
@@ -64,6 +68,7 @@ resource "azurerm_virtual_network" "main" {
   address_space = ["10.0.0.0/16"]
 
   tags = {
+    Name        = "terraform-course"
     Environment = "Lab"
     Managed_By = "Terraform"
   }
