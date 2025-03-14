@@ -91,6 +91,27 @@ terraform fmt
 Expected output: If any files were formatted, their names will be listed. If no formatting was needed, there will be no output.
 
 ### 5. Validate the Configuration
+ Initialize the working directory to prep the environment and download the provider:
+
+ ```bash
+ terraform init
+ ```
+
+Expected Output:
+```bash
+# terraform init
+Initializing the backend...
+Initializing provider plugins...
+- Finding integrations/github versions matching "~> 6.5.0"...
+- Installing integrations/github v6.5.0...
+- Installed integrations/github v6.5.0 (signed by a HashiCorp partner, key ID 38027F80D7FD5FB2)
+Partner and community providers are signed by their developers.
+If you'd like to know more about provider signing, you can read about it here:
+https://www.terraform.io/docs/cli/plugins/signing.html
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+```
+
+### 6. Validate the Configuration
 
 Run the validation command to check for syntax errors:
 
@@ -103,7 +124,7 @@ Expected output:
 Success! The configuration is valid.
 ```
 
-### 6. Test Version Constraints
+### 7. Test Version Constraints
 
 Let's experiment with version constraints:
 
