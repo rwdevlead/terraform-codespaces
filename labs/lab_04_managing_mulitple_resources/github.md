@@ -1,9 +1,7 @@
 # LAB-04-GH: Managing Multiple Resources and Dependencies
 
-# **Please note that I am rebuilding this lab - steps below may not work as expected**
-
 ## Overview
-In this lab, you will expand your GitHub repository configuration by adding multiple interconnected resources. You'll learn how Terraform manages dependencies between resources and how to structure more complex configurations. We'll create teams, manage repository permissions, and implement branch protection rules, demonstrating how different GitHub resources work together.
+In this lab, you will expand your GitHub repository configuration by adding multiple interconnected resources. You'll learn how Terraform manages dependencies between resources and how to structure more complex configurations. We'll create repositories, manage repository configures, and implement branch protection rules, demonstrating how different GitHub resources work together.
 
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
@@ -23,88 +21,93 @@ In this lab, you will expand your GitHub repository configuration by adding mult
 Add the following to your existing `variables.tf`:
 
 ```hcl
-# Team Variables
-variable "team_name" {
-  description = "Name of the development team"
+# Development Repo Variables
+variable "dev_repository_name" {
+  description = "Name of the Dev GitHub repository"
   type        = string
-  default     = "terraform-team"
+  default     = "development-repo"
 }
 
-variable "team_description" {
-  description = "Description of the team"
-  type        = string
-  default     = "Team managed by Terraform"
+variable "dev_repo_issues" {
+  description = "Dev repo issues settings"
+  type        = bool
+  default     = true
 }
 
-variable "required_reviewers" {
-  description = "Number of required reviewers for pull requests"
-  type        = number
-  default     = 2
+variable "dev_discussions" {
+  description = "Dev repo discussions settings"
+  type        = bool
+  default     = true
+}
+
+variable "dev_wiki" {
+  description = "Dev repo wiki settings"
+  type        = bool
+  default     = true
 }
 ```
 
 ### 2. Configure Team Repository Access
 
-Add team permissions for the repository in `main.tf`:
+Add new configurations for the new development repository in `main.tf`:
 
 ```hcl
-# Team Repository Access
-resource "github_team_repository" "developers_access" {
-  team_id    = github_team.developers.id
-  repository = github_repository.example.name
-  permission = "push"
-}
+# Create development repository
+resource "github_repository" "development" {
+  name        = var.dev_repository_name
+  description = "Primary Dev Repo for new apps"
+  visibility  = "public"
 
-resource "github_team_repository" "reviewers_access" {
-  team_id    = github_team.reviewers.id
-  repository = github_repository.example.name
-  permission = "maintain"
+  auto_init = true
+
+  has_issues      = var.dev_repo_issues
+  has_discussions = var.dev_discussions
+  has_wiki        = var.dev_wiki
+
+  allow_merge_commit = true
+  allow_squash_merge = true
+  allow_rebase_merge = true
+
+  topics = ["terraform", "infrastructure-as-code"]
 }
 ```
 
-### 3. Create Branch Protection Rules
+### 3. Create Development Configuration Options
 
-Modify/Replace the branch protection rules that reference the teams - this is the second resource block we created in `main.tf`:
+Add new configurations for related settings for the development repository in `main.tf`:
 
 ```hcl
-# Branch Protection
-resource "github_branch_protection" "main" {
-  repository_id = github_repository.example.node_id
+resource "github_branch_protection" "development" {
+  repository_id = github_repository.development.node_id
   pattern       = "main"
+}
 
-  required_pull_request_reviews {
-    required_approving_review_count = var.required_reviewers
-    dismiss_stale_reviews          = true
-    require_code_owner_reviews     = true
-  }
+resource "github_branch" "development" {
+  repository = github_repository.development.name
+  branch     = "main"
+}
 
-  required_status_checks {
-    strict = true
-  }
-
-  restrict_pushes {
-    push_allowances = [github_team.reviewers.node_id]
-  }
+resource "github_branch_default" "development" {
+  repository = github_repository.development.name
+  branch     = github_branch.development.branch
 }
 ```
 
-### 4. Add Repository Files
+### 4. Add a Repository File (.gitignore)
 
 Create a CODEOWNERS file in the repository:
 
 ```hcl
 # Repository Files
-resource "github_repository_file" "codeowners" {
-  repository          = github_repository.example.name
-  branch             = "main"
-  file               = "CODEOWNERS"
-  content            = "*"
-  commit_message     = "Add CODEOWNERS file"
+resource "github_repository_file" "development" {
+  repository          = github_repository.development.name
+  branch              = github_branch.development.branch
+  file                = ".gitignore"
+  content             = "**/*.tfstate"
+  commit_message      = "Managed by Terraform"
+  commit_author       = "Terraform User"
+  commit_email        = "terraform@course.com"
   overwrite_on_create = true
-
-  depends_on = [
-    github_branch_protection.main
-  ]
 }
 ```
 
@@ -112,10 +115,13 @@ resource "github_repository_file" "codeowners" {
 
 ### 5. Add New Outputs
 
-Add the following output blocks to your `outputs.tf` file to see information about the newly created subnets:
+Add the following output block to your `outputs.tf` file to see information about the newly created repository:
 
 ```hcl
-************   add outputs here   *********
+output "development_repo" {
+  description = "The name of the development repo"
+  value       = github_repository.development.name
+}
 ```
 
 ### 6. Update terraform.tfvars
@@ -123,10 +129,14 @@ Add the following output blocks to your `outputs.tf` file to see information abo
 Add the team values to your existing `terraform.tfvars`:
 
 ```hcl
-# Team Variables
-team_name        = "terraform-course"
-team_description = "Team for Terraform training course"
-required_reviewers = 2
+# Change variable value to `public`
+repository_visibility = "public"
+
+# Development Repo Configurations
+dev_repository_name = "development-repo"
+dev_repo_issues     = true
+dev_wiki            = true
+dev_discussions     = false
 ```
 
 ### 7. Apply the Configuration
@@ -154,9 +164,9 @@ This is handled through both implicit dependencies (where Terraform determines r
 
 In the GitHub web interface:
 1. Navigate to your repository's settings
-2. Verify the teams exist and have the correct permissions
+2. Verify the teams exist
 3. Check the branch protection rules
-4. Confirm the CODEOWNERS file exists and is properly configured
+4. Confirm the `.gitignore` file exists and is properly configured
 
 ## Success Criteria
 Your lab is successful if:
