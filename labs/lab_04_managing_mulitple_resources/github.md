@@ -1,5 +1,7 @@
 # LAB-04-GH: Managing Multiple Resources and Dependencies
 
+# **Please note that I am rebuilding this lab - steps below may not work as expected**
+
 ## Overview
 In this lab, you will expand your GitHub repository configuration by adding multiple interconnected resources. You'll learn how Terraform manages dependencies between resources and how to structure more complex configurations. We'll create teams, manage repository permissions, and implement branch protection rules, demonstrating how different GitHub resources work together.
 
@@ -41,52 +43,33 @@ variable "required_reviewers" {
 }
 ```
 
-### 2. Create Teams
+### 2. Configure Team Repository Access
 
-Add the following team configuration to `main.tf`. Notice how we're creating multiple teams with different purposes:
-
-```hcl
-# Create Teams
-resource "github_team" "developers" {
-  name        = "${var.team_name}-developers"
-  description = "${var.team_description} - Developers"
-  privacy     = "closed"
-}
-
-resource "github_team" "reviewers" {
-  name        = "${var.team_name}-reviewers"
-  description = "${var.team_description} - Code Reviewers"
-  privacy     = "closed"
-}
-```
-
-### 3. Configure Team Repository Access
-
-Add team permissions for the repository:
+Add team permissions for the repository in `main.tf`:
 
 ```hcl
 # Team Repository Access
 resource "github_team_repository" "developers_access" {
   team_id    = github_team.developers.id
-  repository = github_repository.main.name
+  repository = github_repository.example.name
   permission = "push"
 }
 
 resource "github_team_repository" "reviewers_access" {
   team_id    = github_team.reviewers.id
-  repository = github_repository.main.name
+  repository = github_repository.example.name
   permission = "maintain"
 }
 ```
 
-### 4. Create Branch Protection Rules
+### 3. Create Branch Protection Rules
 
-Add branch protection rules that reference the teams:
+Modify/Replace the branch protection rules that reference the teams - this is the second resource block we created in `main.tf`:
 
 ```hcl
 # Branch Protection
 resource "github_branch_protection" "main" {
-  repository_id = github_repository.main.node_id
+  repository_id = github_repository.example.node_id
   pattern       = "main"
 
   required_pull_request_reviews {
@@ -99,23 +82,23 @@ resource "github_branch_protection" "main" {
     strict = true
   }
 
-  push_restrictions = [
-    github_team.reviewers.node_id
-  ]
+  restrict_pushes {
+    push_allowances = [github_team.reviewers.node_id]
+  }
 }
 ```
 
-### 5. Add Repository Files
+### 4. Add Repository Files
 
 Create a CODEOWNERS file in the repository:
 
 ```hcl
 # Repository Files
 resource "github_repository_file" "codeowners" {
-  repository          = github_repository.main.name
+  repository          = github_repository.example.name
   branch             = "main"
   file               = "CODEOWNERS"
-  content            = "* @${github_team.reviewers.slug}"
+  content            = "*"
   commit_message     = "Add CODEOWNERS file"
   overwrite_on_create = true
 
@@ -127,33 +110,15 @@ resource "github_repository_file" "codeowners" {
 
 > Note the explicit dependency on the branch protection rule to ensure the file can be created after the branch is protected.
 
-### 6. Add New Outputs
+### 5. Add New Outputs
 
 Add the following output blocks to your `outputs.tf` file to see information about the newly created subnets:
 
 ```hcl
-output "developers_team_id" {
-  description = "ID of the developers team"
-  value       = github_team.developers.id
-}
-
-output "developers_team_slug" {
-  description = "Slug of the developers team"
-  value       = github_team.developers.slug
-}
-
-output "reviewers_team_id" {
-  description = "ID of the reviewers team"
-  value       = github_team.reviewers.id
-}
-
-output "reviewers_team_slug" {
-  description = "Slug of the reviewers team"
-  value       = github_team.reviewers.slug
-}
+************   add outputs here   *********
 ```
 
-### 7. Update terraform.tfvars
+### 6. Update terraform.tfvars
 
 Add the team values to your existing `terraform.tfvars`:
 
@@ -164,7 +129,7 @@ team_description = "Team for Terraform training course"
 required_reviewers = 2
 ```
 
-### 8. Apply the Configuration
+### 7. Apply the Configuration
 
 Run the following commands:
 ```bash
