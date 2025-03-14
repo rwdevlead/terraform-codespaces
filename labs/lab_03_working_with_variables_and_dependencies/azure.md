@@ -180,7 +180,7 @@ vnet_address_space = ["172.16.0.0/16"]
 environment        = "testing"
 ```
 
-Try applying with this new variable file:
+Try running a plan with this new variable file to see how to specify a specific variables file:
 ```bash
 terraform plan -var-file="testing.tfvars"
 ```
