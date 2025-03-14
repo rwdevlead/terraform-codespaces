@@ -449,7 +449,7 @@ module "api_repository" {
   source      = "./modules/github_repository"
   name        = "api-${var.environment}"
   description = "API service repository"
-  visibility  = "private"
+  visibility  = "public"
   
   has_issues   = true
   has_projects = true
@@ -466,7 +466,7 @@ module "frontend_repository" {
   source      = "./modules/github_repository"
   name        = "frontend-${var.environment}"
   description = "Frontend application repository"
-  visibility  = "private"
+  visibility  = "public"
   
   has_issues   = true
   has_projects = true

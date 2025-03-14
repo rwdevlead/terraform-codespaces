@@ -66,7 +66,7 @@ data "github_organization" "current" {
 resource "github_repository" "development" {
   name        = "development-repo"
   description = "Development repository created by ${data.github_user.current.login}"
-  visibility  = "private"
+  visibility  = "public"
 
   template {
     owner      = data.github_organization.current.orgname

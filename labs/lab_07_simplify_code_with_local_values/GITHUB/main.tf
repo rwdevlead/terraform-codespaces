@@ -2,7 +2,7 @@
 resource "github_repository" "app" {
   name        = "production-application"
   description = "Production application repository"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = true
   has_wiki        = true
@@ -27,7 +27,7 @@ resource "github_repository" "app" {
 resource "github_repository" "docs" {
   name        = "production-documentation"
   description = "Production documentation repository"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = true
   has_wiki        = true

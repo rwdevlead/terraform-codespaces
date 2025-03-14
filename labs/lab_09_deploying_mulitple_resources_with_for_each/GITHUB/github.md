@@ -36,7 +36,7 @@ resource "github_repository" "repo_count" {
   count       = 3
   name        = "repo-count-${count.index + 1}"
   description = "Repository ${count.index + 1} created with count"
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   topics = ["terraform", "count", "example"]
@@ -187,7 +187,7 @@ resource "github_repository" "repo_foreach" {
   for_each    = var.repositories
   name        = "repo-${each.key}"
   description = each.value
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   topics = ["terraform", "foreach", "example"]
