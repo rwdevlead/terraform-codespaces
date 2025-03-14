@@ -20,26 +20,33 @@ In this lab, you will enhance your existing GitHub repository configuration by i
 First, let's review our current `main.tf` file from the previous lab:
 
 ```hcl
-resource "github_repository" "main" {
-  name        = "terraform-course"
-  description = "Repository managed by Terraform"
+# Create the repository
+resource "github_repository" "example" {
+  name        = "terraform-example"
+  description = "Updated repository description"
   visibility  = "public"
 
   auto_init = true
 
   has_issues      = true
   has_discussions = true
-  has_wiki        = true
+  has_wiki        = false
 
   allow_merge_commit = true
   allow_squash_merge = true
   allow_rebase_merge = true
 
-  tags = [
-    "terraform",
-    "learning-terraform",
-    "infrastructure-as-code"
-  ]
+  topics = ["terraform", "infrastructure-as-code", "learning"]
+}
+
+# Create branch protection rule
+resource "github_branch_protection" "main" {
+  repository_id = github_repository.example.node_id
+  pattern       = "main"
+
+  required_pull_request_reviews {
+    required_approving_review_count = 2
+  }
 }
 ```
 
@@ -51,13 +58,13 @@ Add the following variable definitions to the `variables.tf` file:
 variable "repository_name" {
   description = "Name of the GitHub repository"
   type        = string
-  default     = "terraform-course"
+  default     = "terraform-example"
 }
 
 variable "repository_visibility" {
   description = "Visibility of the repository"
   type        = string
-  default     = "private"
+  default     = "public"
 }
 
 variable "environment" {
@@ -76,7 +83,7 @@ variable "repository_features" {
   default = {
     has_issues      = true
     has_discussions = true
-    has_wiki        = true
+    has_wiki        = false
   }
 }
 ```
@@ -94,15 +101,15 @@ Now modify `main.tf` to use the new variables:
 
 ```hcl
 resource "github_repository" "main" {
-  name        = var.repository_name
+  name        = var.repository_name # <-- update value here
   description = "Repository managed by Terraform"
-  visibility  = var.repository_visibility
+  visibility  = var.repository_visibility # <-- update value here
 
   auto_init = true
 
-  has_issues      = var.repository_features.has_issues
-  has_discussions = var.repository_features.has_discussions
-  has_wiki        = var.repository_features.has_wiki
+  has_issues      = var.repository_features.has_issues # <-- update value here
+  has_discussions = var.repository_features.has_discussions # <-- update value here
+  has_wiki        = var.repository_features.has_wiki # <-- update value here
 
   allow_merge_commit = true
   allow_squash_merge = true
@@ -135,7 +142,7 @@ You can also just right-click the terraform directory on the left and select **N
 Add the following variable values to the `terraform.tfvars` file to override our defaults with new values:
 ```hcl
 repository_name     = "terraform-development"
-repository_visibility = "public"
+repository_visibility = "private"
 environment        = "development"
 repository_features = {
   has_issues      = true
@@ -151,7 +158,7 @@ terraform plan
 
 Now you should see that Terraform plans to destroy and recreate the repository because:
 - The repository name will change
-- The visibility will change from `private` to `public`
+- The visibility will change from `public` to `private`
 - The environment tag will change
 - Some features will be disabled
 
@@ -167,22 +174,22 @@ Create a new file named `outputs.tf` and add the following output blocks:
 ```hcl
 output "repository_id" {
   description = "ID of the created repository"
-  value       = github_repository.main.repo_id
+  value       = github_repository.example.repo_id
 }
 
 output "repository_html_url" {
   description = "URL of the created repository"
-  value       = github_repository.main.html_url
+  value       = github_repository.example.html_url
 }
 
 output "repository_git_clone_url" {
   description = "Git clone URL of the repository"
-  value       = github_repository.main.git_clone_url
+  value       = github_repository.example.git_clone_url
 }
 
 output "repository_visibility" {
   description = "Visibility of the repository"
-  value       = github_repository.main.visibility
+  value       = github_repository.example.visibility
 }
 ```
 
@@ -201,13 +208,13 @@ repository_name       = "terraform-testing"
 repository_visibility = "private"
 environment          = "testing"
 repository_features = {
-  has_issues      = false
-  has_discussions = false
-  has_wiki        = false
+  has_issues      = true
+  has_discussions = true
+  has_wiki        = true
 }
 ```
 
-Try applying with this new variable file:
+Try running a plan with this new variable file to see how to specify a specific variables file:
 ```bash
 terraform plan -var-file="testing.tfvars"
 ```
