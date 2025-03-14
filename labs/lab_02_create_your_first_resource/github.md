@@ -46,7 +46,7 @@ Open `main.tf` and add the following configuration (purposely not written in HCL
 resource "github_repository" "example" {
   name = "terraform-example"
   description = "Repository created by Terraform"
-  visibility = "public"
+  visibility = "pub"
 
   auto_init = true
 
@@ -59,6 +59,16 @@ resource "github_repository" "example" {
   allow_rebase_merge = true
   
   topics = ["terraform", "infrastructure-as-code"]
+}
+
+# Create branch protection rule
+resource "github_branch_protection" "main" {
+  repository_id = github_repository.example.node_id
+  pattern       = "main"
+
+  required_pull_request_reviews {
+    required_approving_review_count = 1
+  }
 }
 ```
 
@@ -130,16 +140,6 @@ resource "github_repository" "terraform" {
   allow_rebase_merge = true
 
   topics = ["terraform", "infrastructure-as-code", "learning"]  # <-- add topic
-}
-
-# Create branch protection rule
-resource "github_branch_protection" "main" {
-  repository_id = github_repository.terraform.node_id
-  pattern       = "main"
-
-  required_pull_request_reviews {
-    required_approving_review_count = 1
-  }
 }
 ```
 
