@@ -3,7 +3,7 @@ resource "github_repository" "repo_count" {
   count       = 3
   name        = "repo-count-${count.index + 1}"
   description = "Repository ${count.index + 1} created with count"
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   topics = ["terraform", "count", "example"]

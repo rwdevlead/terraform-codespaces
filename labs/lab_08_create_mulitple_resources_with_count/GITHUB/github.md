@@ -34,7 +34,7 @@ The lab directory contains the following files with repetitive resource creation
 resource "github_repository" "repo1" {
   name        = "example-repo-1"
   description = "Example repository 1"
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   topics = ["example", "terraform", "repo1"]
@@ -43,7 +43,7 @@ resource "github_repository" "repo1" {
 resource "github_repository" "repo2" {
   name        = "example-repo-2"
   description = "Example repository 2"
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   topics = ["example", "terraform", "repo2"]
@@ -52,7 +52,7 @@ resource "github_repository" "repo2" {
 resource "github_repository" "repo3" {
   name        = "example-repo-3"
   description = "Example repository 3"
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   topics = ["example", "terraform", "repo3"]
@@ -216,7 +216,7 @@ resource "github_repository" "repo" {
   count       = var.repo_count
   name        = var.repo_names[count.index]
   description = "Example repository ${count.index + 1}"
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   topics = ["example", "terraform", "repo${count.index + 1}"]

@@ -34,7 +34,7 @@ The lab directory contains the following files with hardcoded values that we'll 
 resource "github_repository" "production" {
   name        = "production-application"
   description = "Production application repository"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = true
   has_wiki        = true
@@ -158,7 +158,7 @@ Replace the existing resources in `main.tf` with this dynamic configuration:
 resource "github_repository" "dynamic" {
   name        = "${var.environment}-${var.app_name}"
   description = "${title(var.environment)} environment repository managed by ${data.github_user.current.login}"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = var.repository_features.has_issues
   has_wiki        = var.repository_features.has_wiki

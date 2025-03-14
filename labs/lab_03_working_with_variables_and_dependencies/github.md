@@ -23,7 +23,7 @@ First, let's review our current `main.tf` file from the previous lab:
 resource "github_repository" "main" {
   name        = "terraform-course"
   description = "Repository managed by Terraform"
-  visibility  = "private"
+  visibility  = "public"
 
   auto_init = true
 

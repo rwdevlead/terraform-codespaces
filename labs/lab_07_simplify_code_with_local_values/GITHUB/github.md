@@ -34,7 +34,7 @@ The lab directory contains the following files with repetitive code that we'll r
 resource "github_repository" "app" {
   name        = "production-application"
   description = "Production application repository"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = true
   has_wiki        = true
@@ -59,7 +59,7 @@ resource "github_repository" "app" {
 resource "github_repository" "docs" {
   name        = "production-documentation"
   description = "Production documentation repository"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = true
   has_wiki        = true
@@ -224,7 +224,7 @@ Replace the resources in `main.tf` with these refactored versions:
 resource "github_repository" "app" {
   name        = "${local.name_prefix}application"
   description = "${title(var.environment)} application repository. ${local.managed_by}"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = local.repo_features.has_issues
   has_wiki        = local.repo_features.has_wiki
@@ -244,7 +244,7 @@ resource "github_repository" "app" {
 resource "github_repository" "docs" {
   name        = "${local.name_prefix}documentation"
   description = "${title(var.environment)} documentation repository. ${local.managed_by}"
-  visibility  = "private"
+  visibility  = "public"
 
   has_issues      = local.repo_features.has_issues
   has_wiki        = local.repo_features.has_wiki

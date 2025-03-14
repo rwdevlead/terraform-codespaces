@@ -96,7 +96,7 @@ resource "github_repository" "main" {
   count       = min(3, length(var.repository_names))
   name        = join("-", [var.environment, var.repository_names[count.index]])
   description = "Repository for ${var.repository_names[count.index]}"
-  visibility  = "private"
+  visibility  = "public"
   auto_init   = true
 
   # This creates repos like "dev-api", "dev-web", etc. using the join function

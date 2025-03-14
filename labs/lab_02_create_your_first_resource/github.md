@@ -46,7 +46,7 @@ Open `main.tf` and add the following configuration (purposely not written in HCL
 resource "github_repository" "example" {
   name = "terraform-example"
   description = "Repository created by Terraform"
-  visibility = "private"
+  visibility = "public"
 
   auto_init = true
 
@@ -117,7 +117,7 @@ In the `main.tf` file, update the repository configuration:
 resource "github_repository" "terraform" {
   name        = "terraform-course-repo"
   description = "Updated repository description"  # <-- change description
-  visibility  = "private"
+  visibility  = "public"
 
   auto_init = true
 
