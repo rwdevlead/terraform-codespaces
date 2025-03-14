@@ -21,10 +21,10 @@ Let's start by exploring some useful Terraform CLI commands:
 
 ```bash
 # View all available Terraform commands
-terraform help
+terraform --help
 
 # Get specific help about state commands
-terraform state help
+terraform state --help
 
 # Show current state resources
 terraform state list
@@ -59,13 +59,13 @@ data "azurerm_client_config" "current" {}
 
 # Get location information
 data "azurerm_location" "current" {
-  name = "eastus"
+  location = "eastus"
 }
 
 # Create Resource Group using data source information
 resource "azurerm_resource_group" "development" {
   name     = "development-resources"
-  location = data.azurerm_location.current.name
+  location = data.azurerm_location.current.display_name
 
   tags = {
     Environment = "development"
@@ -84,7 +84,7 @@ resource "azurerm_virtual_network" "development" {
   tags = {
     Environment  = "development"
     Location     = data.azurerm_location.current.display_name
-    CreatedBy    = "${data.azurerm_subscription.current.subscription_id}-${data.azurerm_location.current.name}"
+    CreatedBy    = "${data.azurerm_subscription.current.subscription_id}-${data.azurerm_location.current.display_name}"
   }
 }
 ```
@@ -118,13 +118,6 @@ terraform {
 
 provider "azurerm" {
   features {}
-  
-  default_tags {
-    tags = {
-      Project     = "Terraform Testing"
-      Managed_By  = "Terraform"
-    }
-  }
 }
 ```
 
@@ -154,12 +147,6 @@ output "resource_group_id" {
   description = "ID of the development resource group"
   value       = azurerm_resource_group.development.id
 }
-
-output "combined_info" {
-  description = "Combined subscription and location information"
-  value       = "${data.azurerm_subscription.current.subscription_id}-${data.azurerm_location.current.name}"
-  sensitive   = true
-}
 ```
 
 ### 7. Initialize and Apply Test Configuration
@@ -188,16 +175,13 @@ terraform output
 
 # Notice that sensitive outputs show as (sensitive)
 # To view sensitive outputs, use the state show command:
-terraform state show output.subscription_id
-terraform state show output.tenant_id
-
-# Or use the -json flag with terraform output:
-terraform output -json subscription_id
+terraform output subscription_id
+terraform output tenant_id
 ```
 
 Notice how sensitive outputs are handled differently:
 - Regular `terraform output` will show "(sensitive)" for these values
-- Using `terraform state show` or `terraform output -json` allows you to view the actual values
+- Using `terraform output <output-name>` allows you to view the actual values
 - This helps protect sensitive information from being accidentally displayed in logs or terminal output
 
 ### 9. Clean Up All Resources
@@ -213,7 +197,7 @@ Then, clean up the main environment:
 
 ```bash
 # Change to main terraform directory
-cd ../terraform
+cd ..
 terraform destroy
 ```
 
