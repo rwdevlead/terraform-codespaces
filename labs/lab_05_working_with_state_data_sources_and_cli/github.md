@@ -1,7 +1,7 @@
-# LAB-05-GH: Working with State, Data Sources, and CLI Commands
+# LAB-05-GH: State Management, Data Sources, and Advanced CLI
 
 ## Overview
-In this lab, you will learn how to work with Terraform state, use data sources to query GitHub information, and explore additional Terraform CLI commands. You'll create a development environment configuration, learn how to inspect and manage state, and properly clean up all resources. The lab introduces the concept of using data sources to make your configurations more dynamic and organization-aware.
+In this lab, you will learn how to work with Terraform state, use data sources to query GitHub information, and explore additional Terraform CLI commands. You'll create a production environment configuration, learn how to inspect and manage state, and properly clean up all resources.
 
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
@@ -11,256 +11,239 @@ In this lab, you will learn how to work with Terraform state, use data sources t
 - Completion of LAB-04-GH with existing repository configuration
 
 ## Estimated Time
-35 minutes
+30 minutes
 
 ## Lab Steps
 
-### 1. Explore Terraform CLI Commands
+### 1. Understanding Terraform State
 
-Let's start by exploring some useful Terraform CLI commands:
+Examine your current state with the following commands:
 
 ```bash
-# View all available Terraform commands
-terraform help
-
-# Get specific help about state commands
-terraform state help
-
-# Show current state resources
 terraform state list
-
-# Show details about a specific resource
-terraform state show github_repository.main
+terraform state show github_repository.example
 ```
 
-### 2. Create a Development Environment Directory
+This displays all resources in your state and details about a specific resource.
 
-Create a new directory for a development environment configuration:
+### 2. Create Data Sources for GitHub Information
 
-```bash
-# Create development directory at the same level as your terraform directory
-cd ..
-mkdir development
-cd development
-
-# Create configuration files
-touch main.tf variables.tf providers.tf outputs.tf
-```
-
-### 3. Add Data Source Configurations
-
-In the new `development` environment's `main.tf`, add the following configuration to query GitHub information:
+Add the top of `main.tf` with the following content:
 
 ```hcl
-# Get information about the current user
+# Get information about the current GitHub user
 data "github_user" "current" {
   username = ""
 }
 
-# Get information about the organization
-data "github_organization" "current" {
-  name = var.organization_name
+# Get information about the example repository
+data "github_repository" "existing_example" {
+  full_name  = "terraform_user/${github_repository.example.name}"
+  depends_on = [github_repository.example]
+}
+```
+
+### 3. Add Production Repository Variables
+
+Add the following to your `variables.tf` file:
+
+```hcl
+# Production Repository Variables
+variable "prod_repository_name" {
+  description = "Name of the Production GitHub repository"
+  type        = string
+  default     = "production-repo"
 }
 
-# Create repository using data source information
-resource "github_repository" "development" {
-  name        = "development-repo"
-  description = "Development repository created by ${data.github_user.current.login}"
+variable "prod_branch_protection" {
+  description = "Number of required approvals for production branch"
+  type        = number
+  default     = 2
+}
+```
+
+### 4. Update terraform.tfvars
+
+Add the production values to your existing `terraform.tfvars`:
+
+```hcl
+# Production Repo Configurations
+prod_repository_name   = "production-repo"
+prod_branch_protection = 3
+```
+
+### 5. Create Production Repository Resources
+
+Add the following to your `main.tf` file:
+
+```hcl
+# Create production repository
+resource "github_repository" "production" {
+  name        = var.prod_repository_name
+  description = "Production repository managed by Terraform"
   visibility  = "public"
+  
+  auto_init = true
+  
+  has_issues      = true
+  has_discussions = false
+  has_wiki        = false
+  
+  vulnerability_alerts = true
+  
+  topics = ["terraform", "production"]
+}
 
-  template {
-    owner      = data.github_organization.current.orgname
-    repository = var.template_repository
+# Create stricter branch protection for production
+resource "github_branch_protection" "production" {
+  repository_id = github_repository.production.node_id
+  pattern       = "main"
+  
+  enforce_admins = true
+  
+  required_pull_request_reviews {
+    required_approving_review_count = var.prod_branch_protection
+    dismiss_stale_reviews           = true
+    require_code_owner_reviews      = true
   }
-
-  topics = [
-    "development",
-    data.github_organization.current.orgname,
-    "terraform-managed"
-  ]
+  
+  require_signed_commits = true
 }
 
-# Create a team with dynamic naming
-resource "github_team" "development" {
-  name        = "dev-team-${data.github_user.current.login}"
-  description = "Development team created via Terraform"
-  privacy     = "closed"
-}
-```
-
-### 4. Add Variable Definitions
-
-Create the variables in `variables.tf`:
-
-```hcl
-variable "organization_name" {
-  description = "Name of the GitHub organization"
-  type        = string
-}
-
-variable "template_repository" {
-  description = "Name of the template repository to use"
-  type        = string
-  default     = "template-repo"
-}
-```
-
-### 5. Add Provider Configuration
-
-Configure the provider in `providers.tf`:
-
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 6.5.0"
-    }
+# Create a production environment
+resource "github_repository_environment" "production" {
+  repository  = github_repository.production.name
+  environment = "production"
+  
+  reviewers {
+    users = [data.github_user.current.id]
+  }
+  
+  deployment_branch_policy {
+    protected_branches     = true
+    custom_branch_policies = false
   }
 }
-
-provider "github" {
-  owner = var.organization_name
-}
 ```
 
-### 6. Add Outputs
+### 6. Add Repository Files Using Data Sources
 
-Create outputs in `outputs.tf`:
+Add the following to `main.tf`:
 
 ```hcl
-output "user_token_scopes" {
-  description = "The OAuth scopes granted to the current user's token"
-  value       = data.github_user.current.token_scopes
-  sensitive   = true
-}
-
-output "organization_id" {
-  description = "The ID of the organization"
-  value       = data.github_organization.current.id
-  sensitive   = true
-}
-
-output "repository_url" {
-  description = "URL of the development repository"
-  value       = github_repository.development.html_url
-}
-
-output "team_name" {
-  description = "Name of the created team"
-  value       = github_team.development.name
-}
-
-output "combined_info" {
-  description = "Combined user and organization information"
-  value       = "${data.github_user.current.login}-${data.github_organization.current.orgname}"
-  sensitive   = true
+# Create a README file that references all repositories
+resource "github_repository_file" "production_readme" {
+  repository          = github_repository.production.name
+  branch              = "main"
+  file                = "README.md"
+  content             = <<-EOT
+    # Production Repository
+    
+    This repository is managed by Terraform.
+    
+    ## Related Repositories
+    
+    - Development: [${github_repository.development.name}](${github_repository.development.html_url})
+    - Example: [${github_repository.example.name}](${github_repository.example.html_url})
+  EOT
+  commit_message      = "Add README via Terraform"
+  commit_author       = "Terraform User"
+  commit_email        = "terraform@course.com"
+  overwrite_on_create = true
 }
 ```
 
-### 7. Initialize and Apply Test Configuration
+### 7. Add Outputs for Data Sources
 
-Initialize and apply the test configuration:
+Add the following to your `outputs.tf` file:
+
+```hcl
+# Data source outputs
+output "current_user" {
+  description = "Current GitHub user name"
+  value       = data.github_user.current.username
+}
+
+# Production repository outputs
+output "production_repo_url" {
+  description = "URL of the production repository"
+  value       = github_repository.production.html_url
+}
+
+output "production_environment" {
+  description = "Production environment name"
+  value       = github_repository_environment.production.environment
+}
+```
+
+### 8. Apply the Configuration and Explore State
+
+Run the following commands:
 
 ```bash
-terraform init
+terraform fmt
+terraform validate
 terraform plan
 terraform apply
 ```
 
-### 8. Explore State Commands
+### 9. Advanced State Commands
 
-With resources created, explore state commands:
+Try these state management commands:
 
 ```bash
-# List all resources in state
+# List all resources in the state
 terraform state list
 
-# Show details of the repository
-terraform state show github_repository.development
+# Show details of a specific resource
+terraform state show github_repository.production
 
-# Show all outputs
-terraform output
+# Create a state backup
+terraform state pull > terraform.tfstate.backup
 
-# Notice that sensitive outputs show as (sensitive)
-# To view sensitive outputs, use the state show command:
-terraform state show output.user_token_scopes
-terraform state show output.organization_id
-
-# Or use the -json flag with terraform output:
-terraform output -json user_token_scopes
+# Perform a targeted apply
+terraform apply -target=github_repository_file.production_readme
 ```
 
-Notice how sensitive outputs are handled differently:
-- Regular `terraform output` will show "(sensitive)" for these values
-- Using `terraform state show` or `terraform output -json` allows you to view the actual values
-- This helps protect sensitive information from being accidentally displayed in logs or terminal output
+### 10. Clean Up Resources
 
-### 9. Clean Up All Resources
-
-First, clean up the development environment:
+To remove specific resources:
 
 ```bash
-# In development directory
-terraform destroy
+# Only destroy the repository file
+terraform destroy -target=github_repository_file.production_readme
 ```
 
-Then, clean up the main environment:
+For complete cleanup after completing Labs 1-5:
 
 ```bash
-# Change to main terraform directory
-cd ../terraform
 terraform destroy
 ```
-
-Review and confirm the destruction of resources in both environments.
-
-## Understanding Data Sources
-
-Data sources allow Terraform to query information from your GitHub organization and use it in your configurations. In this lab, we:
-- Retrieved user information
-- Got organization details
-- Used dynamic naming based on data source values
-- Protected sensitive information using the sensitive output flag
 
 ## Verification Steps
 
-After creating resources:
-1. Verify the repository and team are created with correct settings
-2. Check that the user and organization information is correctly used
-3. Confirm all outputs show the expected information, with sensitive values properly masked
-4. Verify you can view sensitive values using state commands
-
-After cleanup:
-1. Verify all resources are destroyed in both environments
-2. Check the GitHub web interface to confirm no resources remain
-3. Ensure all state files are clean
+In the GitHub web interface:
+1. Verify the production repository was created
+2. Check the README file contains references to other repositories
+3. Examine the production environment settings
 
 ## Success Criteria
 Your lab is successful if:
-- You can use various Terraform CLI commands
-- Data sources successfully query GitHub information
-- Resources are created with dynamic names using data source information
-- You understand how to work with sensitive outputs
-- All resources are properly destroyed
-- You understand how to manage multiple configurations
+- All resources are created successfully
+- Data sources correctly retrieve GitHub information
+- Production environment is properly configured
+- State commands work as expected
 
 ## Additional Exercises
-1. Query additional GitHub data sources
-2. Create more complex repository configurations
-3. Explore other Terraform CLI commands
-4. Practice state commands with different resources
-5. Add more sensitive outputs and practice viewing them
+1. Import an existing repository using `terraform import`
+2. Create a workspace for different environments
+3. Use the `terraform output` command to extract specific values
 
 ## Common Issues and Solutions
 
-If you see errors:
-- Verify GitHub token permissions
-- Ensure you're in the correct directory
-- Check that all resources are properly referenced
-- Verify organization access
-- Confirm proper syntax for viewing sensitive outputs
+- Ensure your GitHub token has sufficient permissions
+- Check if referenced resources exist before using them in data sources
+- If hitting API rate limits, space out your commands
 
-## Conclusion
-This lab demonstrated how to work with multiple configurations, use data sources, manage sensitive outputs, and properly clean up resources. These skills are essential for managing more complex Terraform deployments and maintaining clean GitHub environments.
+## Next Steps
+In the next part of your Terraform journey, consider exploring remote state backends, modules, and integrating Terraform with CI/CD pipelines.
