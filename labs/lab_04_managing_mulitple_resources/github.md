@@ -16,6 +16,8 @@ In this lab, you will expand your GitHub repository configuration by adding mult
 
 ## Lab Steps
 
+**Note**: To fully appreciate this lab and understand how the dependencies work, I recommend typing out the code rather just than copying and pasting.
+
 ### 1. Add New Variable Definitions
 
 Add the following to your existing `variables.tf`:
@@ -129,9 +131,6 @@ output "development_repo" {
 Add the team values to your existing `terraform.tfvars`:
 
 ```hcl
-# Change variable value to `public`
-repository_visibility = "public"
-
 # Development Repo Configurations
 dev_repository_name = "development-repo"
 dev_repo_issues     = true
