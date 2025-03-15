@@ -4,7 +4,7 @@
 
 # HashiCorp Terraform Labs
 
-[![Bryan Krausen - badge-generator](https://img.shields.io/static/v1?label=btkrausen&message=Profile&color=blue&logo=github)](https://github.com/btkrausen)
+[![Bryan Krausen - badge-generator](https://img.shields.io/static/v1?label=btkrausen&message=Profile&color=blue&logo=github)](https://github.com/btkrausen) ![tested](https://img.shields.io/badge/Terraform%201.11.2-Tested-grey?style=flat&logo=terraform&logoColor=white&labelColor=purple)   
 
 Welcome to this HashiCorp Terraform lab repo, where you can get hands-on experience with **HashiCorp Terraform** using GitHub Codespaces. In this repository, you’ll find a variety of [labs](./labs) that walk you through learning and using HashiCorp Terraform in different scenarios.
 
