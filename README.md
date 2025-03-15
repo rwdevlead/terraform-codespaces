@@ -42,7 +42,7 @@ Each lab is available in AWS, Azure, or GitHub - allowing you to choose the plat
 
 Labs 1 through 5 are designed to be completed in order as each builds on the previous lab.
 
-| **#** | **Lab**                                       |                               **AWS**                               |                                **Azure**                                |                                **GitHub**                                 |
+| **#** | **Lab Name**                                       |                               **AWS**                               |                                **Azure**                                |                                **GitHub**                                 |
 | :---: | :-------------------------------------------- | :-----------------------------------------------------------------: | :---------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
 |   1   | Getting Started with Terraform                |     [AWS](./labs/lab_01_getting_started_with_terraform/aws.md)      |     [Azure](./labs/lab_01_getting_started_with_terraform/azure.md)      |     [GitHub](./labs/lab_01_getting_started_with_terraform/github.md)      |
 |   2   | Create Your First Resource                    |       [AWS](./labs/lab_02_create_your_first_resource/aws.md)        |       [Azure](./labs/lab_02_create_your_first_resource/azure.md)        |       [GitHub](./labs/lab_02_create_your_first_resource/github.md)        |
@@ -55,7 +55,7 @@ Labs 1 through 5 are designed to be completed in order as each builds on the pre
 ## ✨ Making Code More Dynamic and Reusable ✨
 
 These labs are fully self-contained and can be completed in any order.
-| **#** | **Lab** | **AWS** | **Azure** | **GitHub** |
+| **#** | **Lab Name** | **AWS** | **Azure** | **GitHub** |
 | :---: | :---------------------------------------------------- | :----------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------: |
 | 6 | Making Code Dynamic and Reusable | [AWS](./labs/lab_06_making_code_dynamic_and_reusable/AWS/aws.md) | [Azure](./labs/lab_06_making_code_dynamic_and_reusable/AZURE/azure.md) | [GitHub](./labs/lab_06_making_code_dynamic_and_reusable/GITHUB/github.md) |
 | 7 | Simplify Code with `Local` Values | [AWS](./labs/lab_07_simplify_code_with_local_values/AWS/aws.md) | [Azure](./labs/lab_07_simplify_code_with_local_values/AZURE/azure.md) | [GitHub](./labs/lab_07_simplify_code_with_local_values/GITHUB/github.md) |
@@ -72,7 +72,7 @@ These labs are fully self-contained and can be completed in any order.
 
 These labs are fully self-contained and can be completed in any order.
 
-| **#** | **Lab**                                 |                           **AWS**                            |                             **Azure**                              |                              **GitHub**                               |
+| **#** | **Lab Name**                                 |                           **AWS**                            |                             **Azure**                              |                              **GitHub**                               |
 | :---: | :-------------------------------------- | :----------------------------------------------------------: | :----------------------------------------------------------------: | :-------------------------------------------------------------------: |
 |  14   | Using Modules in the Terraform Registry | [AWS](./labs/lab_14_using_the_terraform_registry/AWS/aws.md) | [Azure](./labs/lab_14_using_the_terraform_registry/AZURE/azure.md) | [GitHub](./labs/lab_14_using_the_terraform_registry/GITHUB/github.md) |
 |  15   | Build Your Own Local Modules            |    [AWS](./labs/lab_15_build_your_own_modules/AWS/aws.md)    |    [Azure](./labs/lab_15_build_your_own_modules/AZURE/azure.md)    |    [GitHub](./labs/lab_15_build_your_own_modules/GITHUB/github.md)    |
@@ -83,7 +83,7 @@ These labs are fully self-contained and can be completed in any order.
 
 These labs are fully self-contained and can be completed in any order.
 
-| **#** | **Lab**                          |                             **AWS**                              |                               **Azure**                                |                                **GitHub**                                 |
+| **#** | **Lab Name**                          |                             **AWS**                              |                               **Azure**                                |                                **GitHub**                                 |
 | :---: | :------------------------------- | :--------------------------------------------------------------: | :--------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
 |  16   | Replacing a Single Resource | Coming Soon | Coming Soon | Coming Soon |
 |  17   | Upgrading a Provider and Module | Coming Soon | Coming Soon | Coming Soon |
