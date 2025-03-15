@@ -142,7 +142,7 @@ You can also just right-click the terraform directory on the left and select **N
 Add the following variable values to the `terraform.tfvars` file to override our defaults with new values:
 ```hcl
 repository_name     = "terraform-development"
-repository_visibility = "private"
+repository_visibility = "public"
 environment        = "development"
 repository_features = {
   has_issues      = true
@@ -158,7 +158,6 @@ terraform plan
 
 Now you should see that Terraform plans to destroy and recreate the repository because:
 - The repository name will change
-- The visibility will change from `public` to `private`
 - The environment tag will change
 - Some features will be disabled
 
@@ -193,7 +192,7 @@ output "repository_visibility" {
 }
 ```
 
-Run terraform apply to register the outputs:
+Run `terraform apply` to register the outputs:
 ```bash
 terraform apply
 ```
@@ -206,11 +205,11 @@ Create a new file named `testing.tfvars`:
 ```hcl
 repository_name       = "terraform-testing"
 repository_visibility = "private"
-environment          = "testing"
+environment           = "testing"
 repository_features = {
-  has_issues      = true
-  has_discussions = true
-  has_wiki        = true
+  has_issues      = false
+  has_discussions = false
+  has_wiki        = false
 }
 ```
 
