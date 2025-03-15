@@ -46,7 +46,7 @@ Open `main.tf` and add the following configuration (purposely not written in HCL
 resource "github_repository" "example" {
   name = "terraform-example"
   description = "Repository created by Terraform"
-  visibility = "pub"
+  visibility = "public"
 
   auto_init = true
 
