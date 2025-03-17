@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will create your first Terraform configuration for AWS by setting up the required file structure and implementing the AWS provider configuration. You'll learn how to format, validate, and initialize a Terraform working directory.
 
+[![Lab 01](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_01)](https://github.com/username/repo/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -21,6 +23,9 @@ Note: AWS credentials are not required for this lab as we will only be configuri
 
 ## Estimated Time
 15 minutes
+
+## Testing
+![testing](https://img.shields.io/badge/Passing-Terraform_1.11.2-purple)
 
 ## Lab Steps
 

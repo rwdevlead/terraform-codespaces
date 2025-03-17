@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will create your first AWS resource using Terraform: a Virtual Private Cloud (VPC). We will build upon the configuration files created in LAB-01, adding resource configuration and implementing the full Terraform workflow. The lab introduces environment variables for AWS credentials, resource blocks, and the essential Terraform commands for resource management.
 
+[![Lab 02](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_02)](https://github.com/username/repo/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
