@@ -3,7 +3,7 @@
 ## Overview
 In this lab, you will enhance your existing VPC configuration by implementing variables and outputs. You'll learn how variables work, how different variable definitions take precedence, and how to use output values to display resource information. We'll build this incrementally to understand how each change affects our configuration.
 
-[![Lab 03](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_03)](https://github.com/username/repo/actions/workflows/aws_lab_validation.yml)
+[![Lab 03](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_03)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
 
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 

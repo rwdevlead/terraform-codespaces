@@ -3,7 +3,7 @@
 ## Overview
 In this lab, you will learn how to work with Terraform state, use data sources to query AWS information, and explore additional Terraform CLI commands. You'll create a test environment configuration, learn how to inspect and manage state, and properly clean up all resources. The lab introduces the concept of using data sources to make your configurations more dynamic and environment-aware.
 
-[![Lab 05](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_05)](https://github.com/username/repo/actions/workflows/aws_lab_validation.yml)
+[![Lab 05](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_05)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
 
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 

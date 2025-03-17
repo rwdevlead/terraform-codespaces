@@ -3,7 +3,7 @@
 ## Overview
 In this lab, you will expand your VPC configuration by adding multiple interconnected resources. You'll learn how Terraform manages dependencies between resources and how to structure more complex configurations. We'll create subnets, route tables, and security groups, all of which are free resources in AWS.
 
-[![Lab 04](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_04)](https://github.com/username/repo/actions/workflows/aws_lab_validation.yml)
+[![Lab 04](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main&event=push&job=lab_04)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
 
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
