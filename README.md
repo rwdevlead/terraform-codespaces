@@ -1,10 +1,11 @@
-### Support My Content Here:
+## Support My Content Here:
 
 [![Udemy](https://img.shields.io/badge/Udemy-A435F0?style=for-the-badge&logo=Udemy&logoColor=white)](https://btk.me/tb) [![Github Sponsor](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/btkrausen?frequency=one-time&sponsor=btkrausen)
 
-# HashiCorp Terraform Labs
+## HashiCorp Terraform Labs
 
-[![Bryan Krausen - badge-generator](https://img.shields.io/static/v1?label=btkrausen&message=Profile&color=blue&logo=github)](https://github.com/btkrausen) ![tested](https://img.shields.io/badge/Terraform%201.11.2-Tested-grey?style=flat&logo=terraform&logoColor=white&labelColor=purple)   
+![tested](https://img.shields.io/badge/Terraform%201.11.2-Tested-grey?style=flat&logo=terraform&logoColor=white&labelColor=purple)
+[![Terraform Tests](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg)](ttps://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
 
 Welcome to this HashiCorp Terraform lab repo, where you can get hands-on experience with **HashiCorp Terraform** using GitHub Codespaces. In this repository, you’ll find a variety of [labs](./labs) that walk you through learning and using HashiCorp Terraform in different scenarios.
 
