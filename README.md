@@ -4,7 +4,7 @@
 
 ## HashiCorp Terraform Labs
 
-![tested](https://img.shields.io/badge/Terraform%201.11.2-Tested-grey?style=flat&logo=terraform&logoColor=white&labelColor=purple)
+[![Teraform Version](https://img.shields.io/badge/Terraform%201.11.2-Tested-grey?style=flat&logo=terraform&logoColor=white&labelColor=purple)](https://releases.hashicorp.com/terraform/1.11.2/)
 [![Terraform Tests](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
 
 Welcome to this HashiCorp Terraform lab repo, where you can get hands-on experience with **HashiCorp Terraform** using GitHub Codespaces. In this repository, you’ll find a variety of [labs](./labs) that walk you through learning and using HashiCorp Terraform in different scenarios.
