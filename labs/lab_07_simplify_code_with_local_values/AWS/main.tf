@@ -11,6 +11,7 @@ resource "aws_vpc" "main" {
     Owner       = "infrastructure-team"
     CostCenter  = "cc-1234"
     Region      = "us-east-1"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -27,6 +28,7 @@ resource "aws_subnet" "public_a" {
     Owner       = "infrastructure-team"
     CostCenter  = "cc-1234"
     Region      = "us-east-1"
+    ManagedBy   = "terraform"
     Tier        = "public"
   }
 }
@@ -44,6 +46,7 @@ resource "aws_subnet" "public_b" {
     Owner       = "infrastructure-team"
     CostCenter  = "cc-1234"
     Region      = "us-east-1"
+    ManagedBy   = "terraform"
     Tier        = "public"
   }
 }
@@ -61,6 +64,7 @@ resource "aws_subnet" "private_a" {
     Owner       = "infrastructure-team"
     CostCenter  = "cc-1234"
     Region      = "us-east-1"
+    ManagedBy   = "terraform"
     Tier        = "private"
   }
 }
@@ -78,6 +82,7 @@ resource "aws_subnet" "private_b" {
     Owner       = "infrastructure-team"
     CostCenter  = "cc-1234"
     Region      = "us-east-1"
+    ManagedBy   = "terraform"
     Tier        = "private"
   }
 }
@@ -115,5 +120,6 @@ resource "aws_security_group" "web" {
     Owner       = "infrastructure-team"
     CostCenter  = "cc-1234"
     Region      = "us-east-1"
+    ManagedBy   = "terraform"
   }
 }
