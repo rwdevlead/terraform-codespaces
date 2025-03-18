@@ -5,11 +5,12 @@ resource "aws_vpc" "production" {
   enable_dns_support   = true
 
   tags = {
-    Name = "production-vpc"
+    Name        = "production-vpc"
     Environment = "production"
-    Project = "static-infrastructure"
-    ManagedBy = "manual-deployment"
-    Region = "us-east-1"
+    Project     = "static-infrastructure"
+    ManagedBy   = "manual-deployment"
+    Region      = "us-east-1"
+    AccountID   = "123456789"
   }
 }
 
@@ -20,11 +21,12 @@ resource "aws_subnet" "private" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "production-private-subnet"
+    Name        = "production-private-subnet"
     Environment = "production"
-    Project = "static-infrastructure"
-    ManagedBy = "terraform"
-    Region = "us-east-1"
+    Project     = "static-infrastructure"
+    ManagedBy   = "terraform"
+    Region      = "us-east-1"
+    AZ          = "us-east-1a"
   }
 }
 
@@ -32,10 +34,10 @@ resource "aws_route_table" "static" {
   vpc_id = aws_vpc.production.id
 
   tags = {
-    Name = "production-route-table"
+    Name        = "production-route-table"
     Environment = "production"
-    Project = "static-infrastructure"
-    ManagedBy = "terraform"
-    Region = "us-east-1"
+    Project     = "static-infrastructure"
+    ManagedBy   = "terraform"
+    Region      = "us-east-1"
   }
 }
