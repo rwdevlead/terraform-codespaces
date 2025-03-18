@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use Terraform's `count` meta-argument to create multiple similar resources efficiently. You'll start with a configuration that creates individual resources and refactor it to create multiple resources using count. The lab uses AWS free-tier resources to ensure no costs are incurred.
 
+[![Lab 08](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -27,149 +29,9 @@ Note: AWS credentials are required for this lab.
 
 The lab directory contains the following files with repetitive resource creation that we'll refactor using count:
 
-### main.tf
-```hcl
-# Basic VPC Configuration
-resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Name = "main-vpc"
-  }
-}
-
-# Individual Subnet Resources
-resource "aws_subnet" "subnet_1" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
-
-  tags = {
-    Name = "subnet-1"
-  }
-}
-
-resource "aws_subnet" "subnet_2" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
-
-  tags = {
-    Name = "subnet-2"
-  }
-}
-
-resource "aws_subnet" "subnet_3" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.3.0/24"
-  availability_zone = "us-east-1c"
-
-  tags = {
-    Name = "subnet-3"
-  }
-}
-
-# Security Groups
-resource "aws_security_group" "web" {
-  name        = "web-sg"
-  description = "Allow web traffic"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "web-sg"
-  }
-}
-
-resource "aws_security_group" "app" {
-  name        = "app-sg"
-  description = "Allow application traffic"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "app-sg"
-  }
-}
-
-resource "aws_security_group" "db" {
-  name        = "db-sg"
-  description = "Allow database traffic"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "db-sg"
-  }
-}
-```
-
-### variables.tf
-```hcl
-variable "region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.region
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Individual subnet resources with similar configuration
@@ -189,15 +51,9 @@ export AWS_SECRET_ACCESS_KEY="your_secret_key"
 
 ### 2. Update Variables for Count
 
-Modify `variables.tf` to include variables that will work with count:
+Modify the `variables.tf` files and add the following variables that will work with count:
 
 ```hcl
-variable "region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
-}
-
 variable "subnet_count" {
   description = "Number of subnets to create"
   type        = number
@@ -247,18 +103,9 @@ variable "security_groups" {
 
 Replace the individual subnet resources with a single count-based resource in `main.tf`:
 
+Delete the resource blocks for `subnet_1`, `subnet_2`, and `subnet_3` and replace them with the following resource block:
+
 ```hcl
-# VPC Configuration remains the same
-resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Name = "main-vpc"
-  }
-}
-
 # Refactored Subnet Resources using count
 resource "aws_subnet" "subnet" {
   count             = var.subnet_count
@@ -286,7 +133,7 @@ Verify that three subnets are created with the correct CIDR blocks and availabil
 
 ### 5. Adjust Subnet Count
 
-Modify the subnet_count variable in `terraform.tfvars` (create this file) to test different subnet counts:
+Modify the `subnet_count` variable bycreating a `terraform.tfvars` file to test different subnet counts:
 
 ```hcl
 subnet_count = 2
@@ -303,7 +150,17 @@ Notice how Terraform plans to destroy one subnet, maintaining only the number sp
 
 ### 6. Refactor Security Groups Using Count
 
-Next, replace the individual security group resources with a count-based approach:
+Next, let's replace the individual security group resources with a count-based approach:
+
+Delete the resource blocks for `aws_security_group.web`, `aws_security_group.app`, and `aws_security_group.db`
+
+Run a `terraform apply` to delete the security groups since we already created them:
+
+```bash
+terraform apply -auto-approve
+```
+
+Now, replace those deleted security groups with the following resource block:
 
 ```hcl
 # Refactored Security Groups using count
@@ -357,11 +214,6 @@ output "security_group_ids" {
   description = "The IDs of the security groups"
   value       = aws_security_group.sg[*].id
 }
-
-output "route_table_ids" {
-  description = "The IDs of the route tables"
-  value       = aws_route_table.example[*].id
-}
 ```
 
 ### 8. Apply Final Configuration
@@ -387,6 +239,7 @@ variable "route_table_count" {
 ```
 
 Add these route tables to `main.tf`:
+
 ```hcl
 # Create multiple route tables
 resource "aws_route_table" "example" {
@@ -399,6 +252,15 @@ resource "aws_route_table" "example" {
 }
 ```
 
+Add an additional output block to the `outputs.tf` file:
+
+```hcl
+output "route_table_ids" {
+  description = "The IDs of the route tables"
+  value       = aws_route_table.example[*].id
+}
+```
+
 Apply the configuration with different route table counts:
 
 ```bash
@@ -408,6 +270,8 @@ terraform apply -var="route_table_count=1"
 # Set route_table_count to 3
 terraform apply -var="route_table_count=3"
 ```
+
+Notice how Terraform creates only the number of `aws_route_tables` based on the variable value. Additionally, notice how the output is also dynamic and outputs the same number of route tables.
 
 ### 10. Clean Up
 
