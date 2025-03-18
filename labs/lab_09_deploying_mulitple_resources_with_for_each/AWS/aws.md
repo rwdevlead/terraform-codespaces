@@ -28,105 +28,9 @@ Note: AWS credentials are required for this lab.
 
 The lab directory contains the following files with resources created using `count` that we'll refactor to use `for_each`:
 
-### main.tf
-```hcl
-# Main VPC
-resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Name = "main-vpc"
-  }
-}
-
-# Subnets created with count
-resource "aws_subnet" "subnet" {
-  count             = 3
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnet_cidr_blocks[count.index]
-  availability_zone = var.availability_zones[count.index]
-
-  tags = {
-    Name = "subnet-${count.index + 1}"
-    Tier = count.index < 1 ? "public" : "private"
-  }
-}
-
-# Security groups created with count
-resource "aws_security_group" "sg" {
-  count       = 3
-  name        = "${var.security_groups[count.index]}-sg"
-  description = "Security group for ${var.security_groups[count.index]}"
-  vpc_id      = aws_vpc.main.id
-
-  tags = {
-    Name = "${var.security_groups[count.index]}-sg"
-  }
-}
-
-# Security group rules created with count
-resource "aws_security_group_rule" "ingress" {
-  count             = 3
-  type              = "ingress"
-  from_port         = var.sg_ports[count.index]
-  to_port           = var.sg_ports[count.index]
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.sg[count.index].id
-}
-```
-
-### variables.tf
-```hcl
-variable "region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "subnet_cidr_blocks" {
-  description = "CIDR blocks for subnets"
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-}
-
-variable "availability_zones" {
-  description = "Availability zones for subnets"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
-}
-
-variable "security_groups" {
-  description = "Security group names"
-  type        = list(string)
-  default     = ["web", "app", "db"]
-}
-
-variable "sg_ports" {
-  description = "Ports for security group rules"
-  type        = list(number)
-  default     = [80, 8080, 3306]
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.region
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Subnet creation using count and list indexing
@@ -146,36 +50,17 @@ export AWS_SECRET_ACCESS_KEY="your_secret_key"
 
 ### 2. Update Variables for For_Each
 
-Modify `variables.tf` to include map and set variables for use with for_each:
+Modify `variables.tf` to include a map and set variables for use with `for_each`:
 
 ```hcl
-variable "region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
-}
-
-# Keep the list variables for comparison
-variable "subnet_cidr_blocks" {
-  description = "CIDR blocks for subnets"
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-}
-
-variable "availability_zones" {
-  description = "Availability zones for subnets"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
-}
-
 # New map variables for for_each
 variable "subnet_config" {
   description = "Map of subnet configurations"
   type        = map(string)
   default = {
-    "public"   = "10.0.1.0/24"
-    "private1" = "10.0.2.0/24"
-    "private2" = "10.0.3.0/24"
+    "public"   = "10.0.10.0/24"
+    "private1" = "10.0.20.0/24"
+    "private2" = "10.0.30.0/24"
   }
 }
 
@@ -202,7 +87,7 @@ variable "security_group_config" {
 
 ### 3. Keep Count-Based Resources
 
-Leave the VPC and count-based resources in place for comparison:
+In your `main.tf`, leave the following VPC and count-based resources in place for comparison:
 
 ```hcl
 # Main VPC
@@ -259,8 +144,8 @@ terraform plan
 terraform apply
 ```
 
-Compare the count-based and for_each-based subnets in the AWS Console:
-- Notice how the for_each subnets have meaningful names based on map keys
+Compare the `count`-based and `for_each`-based subnets in the AWS Console:
+- Notice how the `for_each` subnets have meaningful names based on map keys
 - Observe how the resources are referenced differently in the state file
 
 ### 6. Add Security Group Resources Using For_Each
@@ -315,7 +200,7 @@ variable "route_tables" {
 }
 ```
 
-Add route tables using for_each with this map:
+Add route tables using `for_each` with this map:
 
 ```hcl
 # Route tables created with for_each and a simple map
@@ -339,7 +224,7 @@ terraform apply
 
 ### 8. Create Outputs Using For_Each
 
-Create an `outputs.tf` file to demonstrate how to reference for_each-based resources:
+Create an `outputs.tf` file to demonstrate how to reference `for_each`-based resources:
 
 ```hcl
 output "vpc_id" {
@@ -350,7 +235,7 @@ output "vpc_id" {
 # Outputs for count-based resources
 output "subnet_count_ids" {
   description = "The IDs of the count-based subnets"
-  value       = aws_subnet.subnet_count[*].id
+  value       = aws_subnet.subnet[*].id
 }
 
 # Outputs for for_each-based resources (map)
@@ -371,11 +256,17 @@ output "route_table_ids" {
 }
 ```
 
+Apply the configuration to see the outputs:
+
+```bash
+terraform apply -auto-approve
+```
+
 ### 9. Experiment by Modifying Resources
 
 Let's demonstrate the advantage of for_each when removing or renaming resources:
 
-1. Modify the subnet_config variable to remove one subnet:
+1. Modify the `subnet_config` variable to remove one subnet:
 
 ```hcl
 variable "subnet_config" {
@@ -384,7 +275,7 @@ variable "subnet_config" {
   default = {
     "public"   = "10.0.1.0/24"
     "private1" = "10.0.2.0/24"
-    # Removed "private2" subnet
+                              # <-- Removed "private2" subnet
   }
 }
 
@@ -395,18 +286,35 @@ variable "subnet_azs" {
   default = {
     "public"   = "us-east-1a"
     "private1" = "us-east-1b"
-    # Removed "private2" subnet AZ
+                              # <-- Removed "private2" subnet AZ
   }
 }
 ```
 
-2. Also modify the subnet_cidr_blocks list to remove an element:
+2. Also modify the `subnet_cidr_blocks` variable to remove an element:
 
 ```hcl
 variable "subnet_cidr_blocks" {
   description = "CIDR blocks for subnets"
   type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24"] # Removed the third element
+  default     = ["10.0.1.0/24", "10.0.2.0/24"] # <-- Removed the third element
+}
+```
+
+Finally, update the `aws_subnet.subnet` resource and change the `count` to `2` since we removed one of the elements from the variable:
+
+```hcl
+# Subnets created with count
+resource "aws_subnet" "subnet" {
+  count             = 2                  # <-- Update the count from 3 to 2
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_cidr_blocks[count.index]
+  availability_zone = var.availability_zones[count.index]
+
+  tags = {
+    Name = "subnet-${count.index + 1}"
+    Tier = count.index < 1 ? "public" : "private"
+  }
 }
 ```
 
@@ -422,7 +330,7 @@ Notice how:
 
 ### 10. Add a New Resource to Existing Map
 
-Add a new entry to the security_group_config map:
+Add a new entry to the `security_group_config` map:
 
 ```hcl
 variable "security_group_config" {
