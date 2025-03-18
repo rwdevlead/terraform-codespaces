@@ -75,24 +75,24 @@ variable "subnet_cidr_blocks" {
 variable "security_groups" {
   description = "Security group configurations"
   type = list(object({
-    name        = string
-    description = string
+    name         = string
+    description  = string
     ingress_port = number
   }))
   default = [
     {
-      name        = "web"
-      description = "Allow web traffic"
+      name         = "web"
+      description  = "Allow web traffic"
       ingress_port = 80
     },
     {
-      name        = "app"
-      description = "Allow application traffic"
+      name         = "app"
+      description  = "Allow application traffic"
       ingress_port = 8080
     },
     {
-      name        = "db"
-      description = "Allow database traffic"
+      name         = "db"
+      description  = "Allow database traffic"
       ingress_port = 3306
     }
   ]
