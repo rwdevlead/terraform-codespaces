@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will examine an existing Terraform configuration with hardcoded values and refactor it to be more dynamic and reusable. You'll implement variables, data sources, and string interpolation to create a more flexible infrastructure definition. The lab uses AWS free-tier eligible resources to ensure no costs are incurred.
 
+[![Lab 05](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -27,67 +29,9 @@ Note: AWS credentials are required for this lab.
 
 The lab directory contains the following files with hardcoded values that we'll refactor:
 
-### main.tf
-```hcl
-# Static configuration with hardcoded values
-resource "aws_vpc" "production" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Name = "production-vpc"
-    Environment = "production"
-    Project = "static-infrastructure"
-    ManagedBy = "manual-deployment"
-    Region = "us-east-1"
-  }
-}
-
-resource "aws_subnet" "private" {
-  vpc_id                  = aws_vpc.static.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = false
-
-  tags = {
-    Name = "production-private-subnet"
-    Environment = "production"
-    Project = "static-infrastructure"
-    ManagedBy = "terraform"
-    Region = "us-east-1"
-  }
-}
-
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.production.id
-
-  tags = {
-    Name = "production-route-table"
-    Environment = "production"
-    Project = "static-infrastructure"
-    ManagedBy = "terraform"
-    Region = "us-east-1"
-  }
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = "us-east-1"
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Hardcoded CIDR blocks for VPC and subnet
@@ -109,7 +53,7 @@ export AWS_SECRET_ACCESS_KEY="your_secret_key"
 
 ### 2. Create Variables File
 
-Create `variables.tf` to define variables that will replace hardcoded values:
+Add the following variables to the `variables.tf`file that will replace our hardcoded values:
 
 ```hcl
 variable "environment" {
@@ -159,23 +103,23 @@ data "aws_caller_identity" "current" {}
 Replace the existing resources in `main.tf` with this dynamic configuration:
 
 ```hcl
-resource "aws_vpc" "dynamic" {
+resource "aws_vpc" "production" {
   cidr_block           = var.vpc_cidr # <-- update value here
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
-    Name = "${var.environment}-vpc" # <-- update value here
+    Name        = "${var.environment}-vpc" # <-- update value here
     Environment = var.environment # <-- update value here
-    Project = var.project_name # <-- update value here
-    ManagedBy = "terraform"
-    Region = data.aws_region.current.name # <-- update value here
-    AccountID = data.aws_caller_identity.current.account_id # <-- update value here
+    Project     = var.project_name # <-- update value here
+    ManagedBy   = "terraform"
+    Region      = data.aws_region.current.name # <-- update value here
+    AccountID   = data.aws_caller_identity.current.account_id # <-- add value here
   }
 }
 
-resource "aws_subnet" "dynamic" {
-  vpc_id                  = aws_vpc.production.id # <-- update value here
+resource "aws_subnet" "private" {
+  vpc_id                  = aws_vpc.production.id
   cidr_block              = var.subnet_cidr # <-- update value here
   availability_zone       = data.aws_availability_zones.available.names[0] # <-- update value here
   map_public_ip_on_launch = false
@@ -191,7 +135,7 @@ resource "aws_subnet" "dynamic" {
 }
 
 resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.production.id # <-- update value here
+  vpc_id = aws_vpc.production.id
 
   tags = {
     Name = "${var.environment}-route-table" # <-- update value here
@@ -215,7 +159,7 @@ output "vpc_id" {
 
 output "subnet_id" {
   description = "ID of the created subnet"
-  value       = aws_subnet.production.id
+  value       = aws_subnet.private.id
 }
 
 output "availability_zone" {
@@ -245,10 +189,32 @@ project_name = "dynamic-infrastructure"
 Initialize and apply the configuration:
 
 ```bash
+cd labs/lab_06_making_code_dynamic_and_reusable/AWS
 terraform init
 terraform plan
 terraform apply
 ```
+
+### 8. Update the Tags 
+
+To see how dynamic our code is now, update the value of the `environment` variable in the `terraform.tfvars` file:
+
+```hcl
+environment  = "testing" # <-- update value here
+vpc_cidr     = "172.16.0.0/16"
+subnet_cidr  = "172.16.1.0/24"
+project_name = "dynamic-infrastructure"
+```
+
+### 9. Apply the Changes
+
+Apply the new changes to see how multiple resources and tags are updated just by modifying a single value in our terraform tfvars file. This shows that by using variables and data blocks in our code makes it much more reuable and flexible.
+
+```bash
+terraform apply
+```
+
+Confirm the changes by typing in `yes` when prompted and view the changes make to our resources.
 
 ## Understanding the Changes
 
