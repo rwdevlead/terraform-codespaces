@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use Terraform's `for_each` meta-argument to create and manage multiple resources efficiently. You'll discover how `for_each` differs from `count` and when to use each approach. The lab uses AWS free-tier resources to ensure no costs are incurred.
 
+[![Lab 09](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
