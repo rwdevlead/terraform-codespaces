@@ -86,7 +86,7 @@ These labs are fully self-contained and can be completed in any order.
 
 | **#** | **Lab Name**                          |                             **AWS**                              |                               **Azure**                                |                                **GitHub**                                 |
 | :---: | :------------------------------- | :--------------------------------------------------------------: | :--------------------------------------------------------------------: | :-----------------------------------------------------------------------: |
-|  16   | Replacing a Single Resource | Coming Soon | Coming Soon | Coming Soon |
+|  16   | Replacing a Single Resource | [AWS](./labs/lab_16_replace_a_single_resource/AWS/aws.md) | Coming Soon | Coming Soon |
 |  17   | Upgrading a Provider and Module | Coming Soon | Coming Soon | Coming Soon |
 |  18   | Importing an Existing Resource | Coming Soon | Coming Soon | Coming Soon |
 |  19   | Migrating State to a New Backend | Coming Soon | Coming Soon | Coming Soon |
