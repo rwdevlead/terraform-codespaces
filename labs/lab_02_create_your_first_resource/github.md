@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will create your first GitHub resources using Terraform: a repository and branch protection rules. We will build upon the configuration files created in LAB-01, adding resource configuration and implementing the full Terraform workflow. The lab introduces environment variables for GitHub authentication, resource blocks, and the essential Terraform commands for resource management.
 
+[![Lab 02](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
