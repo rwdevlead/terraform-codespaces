@@ -23,155 +23,54 @@ Note: AWS credentials are required for this lab.
 
 ## Existing Configuration Files
 
-The lab directory contains the following initial files:
+The lab directory contains the following initial files that you will use to learn about explicit dependencies:
 
-### variables.tf
-```hcl
-variable "region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "vpc_cidr" {
-  description = "VPC CIDR block"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "subnet_cidr" {
-  description = "Subnet CIDR block"
-  type        = string
-  default     = "10.0.1.0/24"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 3.0.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.0.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.region
-}
-```
-
-### main.tf
-```hcl
-# Random string for uniqueness
-resource "random_string" "suffix" {
-  length  = 8
-  special = false
-  upper   = false
-}
-
-# VPC
-resource "aws_vpc" "main" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-
-  tags = {
-    Name        = "main-vpc"
-    Environment = var.environment
-  }
-}
-
-# Subnet
-resource "aws_subnet" "public" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnet_cidr
-  availability_zone = "${var.region}a"
-
-  tags = {
-    Name        = "public-subnet"
-    Environment = var.environment
-  }
-}
-
-# Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name        = "main-igw"
-    Environment = var.environment
-  }
-}
-
-# Route Table
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name        = "public-route-table"
-    Environment = var.environment
-  }
-}
-
-# S3 Bucket
-resource "aws_s3_bucket" "logs" {
-  bucket = "logs-${random_string.suffix.result}"
-
-  tags = {
-    Name        = "logs-bucket"
-    Environment = var.environment
-  }
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 ## Lab Steps
 
 ### 1. Identify Implicit Dependencies
 
-Examine the main.tf file and identify the implicit dependencies:
-- Subnet depends on VPC (via vpc_id)
-- Internet Gateway depends on VPC (via vpc_id)
-- Route Table depends on VPC (via vpc_id) and Internet Gateway (via gateway_id)
-- S3 Bucket implicitly depends on the random_string resource
+Examine the `main.tf` file and identify the **implicit** dependencies:
+- Subnet depends on VPC (via `vpc_id`)
+- Internet Gateway depends on VPC (via `vpc_id`)
+- Route Table depends on VPC (via `vpc_id`) and Internet Gateway (via `gateway_id`)
+- S3 Bucket implicitly depends on the `random_string` resource
 
-### 2. Initialize Terraform
+### 2. Configure AWS Credentials
+
+Set up your AWS credentials as environment variables:
+
+```bash
+export AWS_ACCESS_KEY_ID="your_access_key"
+export AWS_SECRET_ACCESS_KEY="your_secret_key"
+```
+
+### 3. Initialize Terraform
 
 Initialize your Terraform workspace:
 ```bash
+# Ensure you're in the right directory
+cd /workspaces/terraform-codespaces/labs/lab_10_managing_explicit_dependencies_with_depends_on/AWS
+
 terraform init
 ```
 
-### 3. Run an Initial Plan and Apply
+### 4. Run an Initial Plan and Apply
 
 Create the initial resources:
 ```bash
 terraform plan
-terraform apply
+terraform apply -auto-approve
 ```
 
 Notice how Terraform automatically determines the correct order based on implicit dependencies.
 
-### 4. Add Resources with Potential Dependency Issues
+### 5. Add Resources with Potential Dependency Issues
 
-Add the following resources to main.tf:
+Add the following resources to `main.tf`:
 
 ```hcl
 # Route Table Association
@@ -215,23 +114,18 @@ resource "aws_s3_bucket_policy" "logs_policy" {
           aws_s3_bucket.logs.arn,
           "${aws_s3_bucket.logs.arn}/*"
         ]
-        Principal = "*"
+        Principal = {
+          AWS = "${data.aws_caller_identity.current.arn}"
+        }
       }
     ]
   })
 }
 ```
 
-### 5. Apply the Changes
-
-Run Terraform apply again:
-```bash
-terraform apply
-```
-
 ### 6. Add Resources with Explicit Dependencies
 
-Now, add the following resources that require explicit dependencies:
+Now, add the following resources that require **explicit** dependencies on the previously added resources:
 
 ```hcl
 # Security Group Rule with explicit dependency
@@ -310,7 +204,7 @@ output "dependency_example" {
   description = "Example of dependencies in this lab"
   value = {
     "Implicit dependencies" = "VPC -> Subnet, VPC -> IGW, IGW -> Route Table"
-    "Explicit dependencies" = "Route Table Association -> SG Rule, Bucket Policy -> Versioning -> Logging"
+    "Explicit dependencies" = "Route Table Association -> SG Rule, Bucket Policy -> Versioning -> Logging Bucket"
   }
 }
 ```
