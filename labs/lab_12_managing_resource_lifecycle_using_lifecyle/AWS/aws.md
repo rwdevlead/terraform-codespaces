@@ -3,6 +3,8 @@
 ## Overview
 This lab demonstrates how to use Terraform's `lifecycle` meta-argument to control the creation, update, and deletion behavior of AWS resources. You'll learn how to prevent resource destruction, create resources before destroying old ones, and ignore specific changes.
 
+[![Lab 12](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -25,84 +27,21 @@ Note: AWS credentials are required for this lab.
 
 ## Existing Configuration Files
 
-The lab directory contains the following initial files:
+The lab directory contains the following initial files used for the lab:
 
-### variables.tf
-```hcl
-variable "region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.region
-}
-```
-
-### main.tf
-```hcl
-# Random string for uniqueness
-resource "random_string" "suffix" {
-  length  = 8
-  special = false
-  upper   = false
-}
-
-# S3 Bucket without lifecycle configuration
-resource "aws_s3_bucket" "standard" {
-  bucket = "standard-${var.environment}-${random_string.suffix.result}"
-
-  tags = {
-    Name        = "Standard Bucket"
-    Environment = var.environment
-  }
-}
-
-# DynamoDB Table without lifecycle configuration
-resource "aws_dynamodb_table" "standard" {
-  name         = "standard-${var.environment}-${random_string.suffix.result}"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "Id"
-
-  attribute {
-    name = "Id"
-    type = "S"
-  }
-
-  tags = {
-    Name        = "Standard Table"
-    Environment = var.environment
-  }
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 ## Lab Steps
 
 ### 1. Initialize Terraform
+
+Validate you are in the correct directory:
+
+```bash
+cd /workspaces/terraform-codespaces/labs/lab_12_managing_resource_lifecycle_using_lifecyle/AWS
+```
 
 Initialize your Terraform workspace:
 ```bash
@@ -111,7 +50,7 @@ terraform init
 
 ### 2. Examine the Initial Configuration
 
-Notice the resources in main.tf do not have any lifecycle configuration.
+Notice the resources in `main.tf` do not have any `lifecycle` configurations.
 
 ### 3. Run an Initial Apply
 
@@ -121,7 +60,7 @@ terraform plan
 terraform apply
 ```
 
-### 4. Add prevent_destroy Lifecycle Configuration
+### 4. Add `prevent_destroy` Lifecycle Configuration
 
 Add a new S3 bucket with the `prevent_destroy` lifecycle configuration:
 
@@ -150,36 +89,42 @@ terraform apply
 
 ### 6. Try to Destroy the Protected Bucket
 
-Modify main.tf to comment out or remove the protected bucket resource:
-
-```hcl
-# S3 Bucket with prevent_destroy
-# resource "aws_s3_bucket" "protected" {
-#   bucket = "protected-${var.environment}-${random_string.suffix.result}"
-#
-#   tags = {
-#     Name        = "Protected Bucket"
-#     Environment = var.environment
-#   }
-#
-#   lifecycle {
-#     prevent_destroy = true
-#   }
-# }
-```
-
-Apply the change and observe the error:
+Using a targeted approach, destroy the `standard` bucket that does NOT include a `lifecycle` argument:
 ```bash
-terraform apply
+terraform destroy -target="aws_s3_bucket.standard" -auto-approve
 ```
 
-Terraform should prevent you from destroying the protected bucket.
+> Terraform should destroy the bucket immediately without issue.
 
-### 7. Restore the Protected Bucket Resource
+Recreate the standard bucket by running a terraform apply again:
+```bash
+terraform apply -auto-approve
+```
 
-Uncomment or restore the protected bucket resource in main.tf.
+Using a targeted approach, destroy the `protected` bucket that includes a `lifecycle` argument:
+```bash
+terraform destroy -target="aws_s3_bucket.protected" -auto-approve
+```
 
-### 8. Add create_before_destroy Lifecycle Configuration
+You should get an error stating that the bucket cannot be destroyed due to the lifecycle configuration:
+```bash
+│ Error: Instance cannot be destroyed
+│ 
+│   on main.tf line 36:
+│   36: resource "aws_s3_bucket" "protected" {
+│ 
+│ Resource aws_s3_bucket.protected has lifecycle.prevent_destroy set, but the plan calls for this resource to be destroyed. To avoid this error and continue with the plan, either disable lifecycle.prevent_destroy or
+│ reduce the scope of the plan using the -target option.
+```
+
+Try to destroy ALL resources in your Terraform configuration
+```bash
+terraform destroy -auto-approve
+```
+
+Terraform will prevent you from destroying the protected bucket - which is one of the purposes of using the `lifecycle` argument.
+
+### 7. Add `create_before_destroy` Lifecycle Configuration
 
 Add a DynamoDB table with the `create_before_destroy` lifecycle configuration:
 
@@ -206,12 +151,13 @@ resource "aws_dynamodb_table" "replacement" {
 }
 ```
 
-### 9. Apply to Create the Replacement Table
+### 8. Apply to Create the Replacement Table (and recreate the standard bucket)
+
 ```bash
 terraform apply
 ```
 
-### 10. Add ignore_changes Lifecycle Configuration
+### 9. Add ignore_changes Lifecycle Configuration
 
 Add an SNS topic with the `ignore_changes` lifecycle configuration to ignore specific attributes:
 
@@ -234,12 +180,12 @@ resource "aws_sns_topic" "updates" {
 }
 ```
 
-### 11. Apply to Create the SNS Topic
+### 10. Apply to Create the SNS Topic
 ```bash
 terraform apply
 ```
 
-### 12. Update the Version Tag Outside of Terraform
+### 11. Update the Version Tag Outside of Terraform
 
 Let's simulate changing the Version tag outside of Terraform (e.g., via AWS Console) by updating it in our Terraform configuration:
 
@@ -251,7 +197,7 @@ resource "aws_sns_topic" "updates" {
   tags = {
     Name        = "Updates Topic"
     Environment = var.environment
-    Version     = "2.0.0"  # Changed but will be ignored
+    Version     = "2.0.0"          # <-- Changed but will be ignored
   }
 
   lifecycle {
@@ -262,17 +208,17 @@ resource "aws_sns_topic" "updates" {
 }
 ```
 
-### 13. Apply and Observe Behavior
+### 12. Apply and Observe Behavior
 ```bash
 terraform plan
 terraform apply
 ```
 
-Notice that Terraform doesn't try to update the Version tag since we've configured it to ignore changes to this attribute.
+> Notice that Terraform doesn't try to update the `Version` tag since we've configured it to ignore changes to this attribute.
 
-### 14. Create outputs.tf
+### 13. Create an `outputs.tf` file
 
-Create an outputs.tf file:
+Create an `outputs.tf` file:
 
 ```hcl
 output "standard_bucket_name" {
@@ -310,12 +256,12 @@ output "lifecycle_examples" {
 }
 ```
 
-### 15. Apply to See Outputs
+### 14. Apply to See Outputs
 ```bash
-terraform apply
+terraform apply -auto-approve
 ```
 
-### 16. Clean Up Resources
+### 15. Clean Up Resources
 
 When you're done, remove the `prevent_destroy` lifecycle setting from the protected bucket first:
 
@@ -335,7 +281,7 @@ resource "aws_s3_bucket" "protected" {
 
 Then clean up all resources:
 ```bash
-terraform apply  # Apply the removal of prevent_destroy first
+terraform apply  # Make sure remove the prevent_destroy first
 terraform destroy
 ```
 
