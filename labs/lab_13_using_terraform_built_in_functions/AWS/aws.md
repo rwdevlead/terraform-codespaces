@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use a few essential Terraform built-in functions: `min`, `max`, `join`, and `toset`. These functions help you manipulate values and create more flexible infrastructure configurations. The lab uses AWS free-tier resources to ensure no costs are incurred.
 
+[![Lab 13](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -25,55 +27,11 @@ Note: AWS credentials are required for this lab.
 
 ## Initial Configuration Files
 
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-  }
-}
+The lab directory contains the following initial files used for the lab - some of which are empty files:
 
-provider "aws" {
-  region = var.region
-}
-```
-
-### variables.tf
-```hcl
-variable "region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "subnet_cidrs" {
-  description = "List of subnet CIDR blocks"
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24"]
-}
-
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
-}
-
-variable "teams" {
-  description = "List of teams with duplicates"
-  type        = list(string)
-  default     = ["development", "operations", "security", "development"]
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 ## Lab Steps
 
@@ -104,9 +62,9 @@ resource "aws_vpc" "main" {
 }
 ```
 
-### 3. Use Min Function for Subnet Count
+### 3. Use `min` Function for Subnet Count
 
-Add subnet resources using the min function to determine how many to create:
+Add subnet resources using the `min` function to determine how many to create:
 
 ```hcl
 # Use min function to determine how many subnets to create
@@ -123,7 +81,7 @@ resource "aws_subnet" "main" {
 }
 ```
 
-### 4. Use Toset Function to Remove Duplicates
+### 4. Use `toset` Function to Remove Duplicates
 
 Create a security group with tags based on unique team names:
 
