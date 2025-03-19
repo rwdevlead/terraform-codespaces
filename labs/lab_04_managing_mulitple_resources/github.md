@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will expand your GitHub repository configuration by adding multiple interconnected resources. You'll learn how Terraform manages dependencies between resources and how to structure more complex configurations. We'll create repositories, manage repository configures, and implement branch protection rules, demonstrating how different GitHub resources work together.
 
+[![Lab 04](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
