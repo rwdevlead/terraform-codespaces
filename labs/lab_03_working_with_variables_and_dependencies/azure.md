@@ -8,7 +8,7 @@ In this lab, you will enhance your existing Azure configuration by implementing 
 ## Prerequisites
 - Terraform installed
 - Azure account with appropriate permissions
-- Completion of LAB-02-AZ with existing Resource Group and VNet configuration
+- Completion of [LAB-02-AZ](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_02_create_your_first_resource/azure.md) with existing Resource Group and VNet configuration
 
 ## Estimated Time
 20 minutes

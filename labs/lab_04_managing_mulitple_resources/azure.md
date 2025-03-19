@@ -8,7 +8,7 @@ In this lab, you will expand your Virtual Network configuration by adding multip
 ## Prerequisites
 - Terraform installed
 - Azure account with appropriate permissions
-- Completion of LAB-03-AZ with existing Resource Group and VNet configuration
+- Completion of [LAB-03-AZ](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_03_working_with_variables_and_dependencies/azure.md) with existing Resource Group and VNet configuration
 
 ## Estimated Time
 30 minutes

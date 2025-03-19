@@ -9,7 +9,7 @@ In this lab, you will create your first Azure resources using Terraform: a Resou
 - Terraform installed
 - Azure CLI installed
 - Azure account with appropriate permissions
-- Completion of LAB-01-AZ
+- Completion of [LAB-01-AZ](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_01_getting_started_with_terraform/azure.md)
 
 ## Estimated Time
 20 minutes

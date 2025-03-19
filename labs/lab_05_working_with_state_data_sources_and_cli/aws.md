@@ -10,7 +10,7 @@ In this lab, you will learn how to work with Terraform state, use data sources t
 ## Prerequisites
 - Terraform installed
 - AWS account with appropriate permissions
-- Completion of LAB-04-AWS with existing VPC and networking configuration
+- Completion of [LAB-04-AWS](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_04_managing_mulitple_resources/aws.md) with existing VPC and networking configuration
 
 ## Estimated Time
 35 minutes

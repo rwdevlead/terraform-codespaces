@@ -10,7 +10,7 @@ In this lab, you will expand your VPC configuration by adding multiple interconn
 ## Prerequisites
 - Terraform installed
 - AWS account with appropriate permissions
-- Completion of LAB-03-AWS with existing VPC configuration
+- Completion of [LAB-03-AWS](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_03_working_with_variables_and_dependencies/aws.md) with existing VPC configuration
 
 ## Estimated Time
 30 minutes

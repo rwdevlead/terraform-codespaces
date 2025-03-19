@@ -10,7 +10,7 @@ In this lab, you will enhance your existing VPC configuration by implementing va
 ## Prerequisites
 - Terraform installed
 - AWS account with appropriate permissions
-- Completion of LAB-02-AWS with existing VPC configuration
+- Completion of [LAB-02-AWS](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_01_getting_started_with_terraform/aws.md) with existing VPC configuration
 
 ## Estimated Time
 20 minutes
