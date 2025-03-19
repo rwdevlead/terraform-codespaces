@@ -3,6 +3,8 @@
 ## Overview
 This lab demonstrates how to use multiple provider blocks in Terraform to deploy resources to different AWS regions simultaneously. You'll create resources in two regions using a simple, free configuration.
 
+[![Lab 11](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -25,91 +27,21 @@ Note: AWS credentials are required for this lab.
 
 ## Existing Configuration Files
 
-The lab directory contains the following initial files:
+The lab directory contains the following initial files that will be used for the lab:
 
-### variables.tf
-```hcl
-variable "primary_region" {
-  description = "Primary AWS region"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "secondary_region" {
-  description = "Secondary AWS region"
-  type        = string
-  default     = "us-west-2"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-  }
-}
-
-# Primary region provider
-provider "aws" {
-  region = var.primary_region
-  alias  = "primary"
-}
-
-# Secondary region provider
-provider "aws" {
-  region = var.secondary_region
-  alias  = "secondary"
-}
-```
-
-### main.tf
-```hcl
-# S3 Bucket in primary region
-resource "aws_s3_bucket" "primary" {
-  provider = aws.primary
-  bucket   = "primary-${var.environment}-${random_string.suffix.result}"
-
-  tags = {
-    Name        = "Primary Region Bucket"
-    Environment = var.environment
-    Region      = var.primary_region
-  }
-}
-
-# S3 Bucket in secondary region
-resource "aws_s3_bucket" "secondary" {
-  provider = aws.secondary
-  bucket   = "secondary-${var.environment}-${random_string.suffix.result}"
-
-  tags = {
-    Name        = "Secondary Region Bucket"
-    Environment = var.environment
-    Region      = var.secondary_region
-  }
-}
-
-# Random string for bucket name uniqueness
-resource "random_string" "suffix" {
-  length  = 8
-  special = false
-  upper   = false
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 ## Lab Steps
 
 ### 1. Initialize Terraform
+
+Validate you are in the correct directory:
+
+```bash
+cd /workspaces/terraform-codespaces/labs/lab_11_using_multiple_providers_for_mulitple_regions/AWS
+```
 
 Initialize your Terraform workspace:
 ```bash
@@ -119,14 +51,16 @@ terraform init
 ### 2. Examine the Provider Configuration
 
 Notice how the provider blocks are configured in providers.tf:
-- The primary provider with an alias of "primary"
-- The secondary provider with an alias of "secondary"
+- The primary provider with an alias of `primary`
+- The secondary provider with an alias of `secondary`
 
 ### 3. Examine the Resource Configuration
 
 Look at how resources specify which provider to use:
 - `provider = aws.primary` for resources in the primary region
 - `provider = aws.secondary` for resources in the secondary region
+
+> Note: Feel free to change the values of the variables `primary_region` and `secondary_region` to your local regions.
 
 ### 4. Run Plan and Apply
 
@@ -136,9 +70,11 @@ terraform plan
 terraform apply
 ```
 
+> Feel free to browse the AWS Console (UI) to see that resources were deployed across two different regions. Specifically for Amazon S3, you don't need to change the region to see all of your buckets across different regions.
+
 ### 5. Add SNS Topics to Both Regions
 
-Add the following resources to main.tf:
+Add the following resources to `main.tf`:
 
 ```hcl
 # SNS Topic in primary region
@@ -173,9 +109,12 @@ Apply the configuration to create the SNS topics:
 terraform apply
 ```
 
-### 7. Create outputs.tf
+> Feel free to browse the AWS Console (UI) to see that resources were deployed across two different regions. For SNS topics, you'll need to change the region in the top right to see the resource in each respective region.
 
-Create an outputs.tf file:
+
+### 7. Create `outputs.tf` file to see information about the resources
+
+Create an `outputs.tf` file:
 
 ```hcl
 output "primary_bucket_name" {
@@ -214,9 +153,12 @@ output "secondary_sns_topic_arn" {
 terraform apply
 ```
 
+Take a look at the outputs. Notice that the SNS topics are in two different regions (based on the ARN). That proves that the topics were deployed in two different regions but within the same Terraform configuration.
+
 ### 9. Clean Up Resources
 
-When you're done, clean up all resources:
+When you are done, clean up all resources:
+
 ```bash
 terraform destroy
 ```
