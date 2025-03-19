@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use modules from the Terraform Registry to create infrastructure more efficiently. You'll use two different modules, with one module using the output from another. You'll also call the same module multiple times with different parameters to create similar but unique resources. The lab uses AWS free-tier resources to ensure no costs are incurred.
 
+[![Lab 14](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -21,63 +23,15 @@ Note: AWS credentials are required for this lab.
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
 
 ## Estimated Time
-25 minutes
+15 minutes
 
 ## Initial Configuration Files
 
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-  }
-}
+The lab directory contains the following initial files used for the lab - some of which are empty files:
 
-provider "aws" {
-  region = var.region
-}
-```
-
-### variables.tf
-```hcl
-variable "region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "vpc_cidr" {
-  description = "CIDR block for VPC"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "vpc_name" {
-  description = "Name of VPC"
-  type        = string
-  default     = "main-vpc"
-}
-
-variable "s3_buckets" {
-  description = "Map of S3 buckets to create"
-  type        = map(string)
-  default = {
-    "logs"      = "Stores application logs"
-    "artifacts" = "Stores build artifacts"
-    "configs"   = "Stores application configs"
-  }
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 ## Lab Steps
 
@@ -92,13 +46,13 @@ export AWS_SECRET_ACCESS_KEY="your_secret_key"
 
 ### 2. Use the VPC Module from Terraform Registry
 
-Create a `main.tf` file and use the AWS VPC module:
+Add the following resource blocks to `main.tf` and use the AWS VPC module:
 
 ```hcl
 # Module 1: VPC Module from Terraform Registry
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.1.2"
+  version = "5.19.0"
 
   name = "${var.environment}-${var.vpc_name}"
   cidr = var.vpc_cidr
@@ -126,7 +80,7 @@ Add the AWS Security Group module, using the VPC ID output from the VPC module:
 # This module uses the VPC ID output from the VPC module
 module "security_group_web" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.0"
+  version = "5.3.0"
 
   name        = "${var.environment}-web-sg"
   description = "Security group for web servers"
@@ -152,7 +106,7 @@ Call the security group module again with different parameters to create another
 # Call the Security Group module a second time to create a different security group
 module "security_group_app" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "5.1.0"
+  version = "5.3.0"
 
   name        = "${var.environment}-app-sg"
   description = "Security group for application servers"
@@ -179,20 +133,26 @@ module "security_group_app" {
 }
 ```
 
-### 5. Use Module with For_Each
+### 5. Use Module with `for_each`
 
 Now, let's demonstrate how to use the `for_each` meta-argument with a module. Add the following to your `main.tf` file to create multiple S3 buckets using the same module but with different names and descriptions:
 
 ```hcl
+# Random string for uniqueness
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
+
 # Module 3: Using S3 bucket module with for_each
 module "s3_buckets" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "3.15.1"
+  version = "4.6.0"
 
-  for_each = var.s3_buckets
+  for_each = var.s3_buckets      # <-- Create a bucket for each bucket using this variable
 
-  bucket = "${var.environment}-${each.key}-bucket"
-  acl    = "private"
+  bucket = "${var.environment}-${each.key}-bucket-${random_string.suffix.result}"
 
   # S3 bucket-level Public Access Block configuration
   block_public_acls       = true
@@ -219,6 +179,8 @@ This configuration:
 - Uses the key to name each bucket (with environment prefix)
 - Uses the value as the description in the tags
 - Configures each bucket with proper security settings
+
+### 6. Add Outputs
 
 Create an `outputs.tf` file to output important information:
 
@@ -254,40 +216,34 @@ output "s3_bucket_names" {
 }
 ```
 
-### 6. Add Outputs
+### 7. Initialize the Configuration
+
+Initialize the configuration to see how Terraform downloads the specified modules to our local machine:
+
+```bash
+terraform init
+```
+
+Notice how Terraform:
+- Downloads the modules from the Terraform Registry
+- Places the modules under the `.terraform` directory
+
+### 8. Apply the Configuration
 
 Initialize and apply the configuration:
 
 ```bash
-terraform init
 terraform plan
 terraform apply
 ```
 
 Notice how Terraform:
-- Downloads the modules from the Terraform Registry
-- Creates a VPC with public and private subnets using the VPC module
-- Creates two different security groups using the same module with different parameters
-- Successfully references the VPC ID from the first module output
-
-### 7. Initialize and Apply
-
-Initialize and apply the configuration:
-
-```bash
-terraform init
-terraform plan
-terraform apply
-```
-
-Notice how Terraform:
-- Downloads the modules from the Terraform Registry
 - Creates a VPC with public and private subnets using the VPC module
 - Creates two different security groups using the same module with different parameters
 - Creates multiple S3 buckets by using the same module with for_each
 - Successfully references the VPC ID from the first module output
 
-### 8. Clean Up
+### 9. Clean Up
 
 Remove all created resources:
 
