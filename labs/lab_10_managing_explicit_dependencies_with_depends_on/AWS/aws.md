@@ -3,6 +3,8 @@
 ## Overview
 This lab demonstrates how to use Terraform's `depends_on` meta-argument with AWS resources. You'll learn when to use explicit dependencies versus relying on implicit dependencies, using only free AWS resources.
 
+[![Lab 10](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 ## Prerequisites
 - Terraform installed
 - AWS free tier account
