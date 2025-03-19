@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to work with Terraform state, use data sources to query GitHub information, and explore additional Terraform CLI commands. You'll create a production environment configuration, learn how to inspect and manage state, and properly clean up all resources.
 
+[![Lab 05](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
