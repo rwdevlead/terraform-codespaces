@@ -3,7 +3,7 @@ resource "azurerm_resource_group" "primary" {
   provider = azurerm.primary
   name     = "rg-${var.environment}-primary"
   location = var.primary_location
-  
+
   tags = {
     Environment = var.environment
     Region      = var.primary_location
@@ -15,7 +15,7 @@ resource "azurerm_resource_group" "secondary" {
   provider = azurerm.secondary
   name     = "rg-${var.environment}-secondary"
   location = var.secondary_location
-  
+
   tags = {
     Environment = var.environment
     Region      = var.secondary_location
@@ -30,7 +30,7 @@ resource "azurerm_storage_account" "primary" {
   location                 = azurerm_resource_group.primary.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  
+
   tags = {
     Environment = var.environment
     Region      = var.primary_location
@@ -45,7 +45,7 @@ resource "azurerm_storage_account" "secondary" {
   location                 = azurerm_resource_group.secondary.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  
+
   tags = {
     Environment = var.environment
     Region      = var.secondary_location
