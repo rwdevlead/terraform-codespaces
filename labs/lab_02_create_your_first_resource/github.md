@@ -11,7 +11,7 @@ In this lab, you will create your first GitHub resources using Terraform: a repo
 - Terraform installed
 - GitHub account with appropriate permissions
 - GitHub Personal Access Token (with repo and admin:org permissions)
-- Completion of LAB-01-GH
+- Completion of [LAB-01-GH](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_01_getting_started_with_terraform/github.md)
 
 ## Estimated Time
 20 minutes

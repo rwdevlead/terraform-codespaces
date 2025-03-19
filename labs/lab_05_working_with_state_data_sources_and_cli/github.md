@@ -10,7 +10,7 @@ In this lab, you will learn how to work with Terraform state, use data sources t
 ## Prerequisites
 - Terraform installed
 - GitHub account with appropriate permissions
-- Completion of LAB-04-GH with existing repository configuration
+- Completion of [LAB-04-GH](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_04_managing_mulitple_resources/github.md) with existing repository configuration
 
 ## Estimated Time
 30 minutes

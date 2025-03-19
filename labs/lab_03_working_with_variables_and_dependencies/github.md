@@ -10,7 +10,7 @@ In this lab, you will enhance your existing GitHub repository configuration by i
 ## Prerequisites
 - Terraform installed
 - GitHub account with appropriate permissions
-- Completion of LAB-02-GH with existing repository configuration
+- Completion of [LAB-02-GH](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_02_create_your_first_resource/github.md) with existing repository configuration
 
 ## Estimated Time
 20 minutes

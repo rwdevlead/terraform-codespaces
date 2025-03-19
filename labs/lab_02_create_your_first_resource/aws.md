@@ -11,7 +11,7 @@ In this lab, you will create your first AWS resource using Terraform: a Virtual 
 - Terraform installed
 - AWS CLI installed
 - AWS account with appropriate permissions
-- Completion of LAB-01-AWS
+- Completion of [LAB-01-AWS](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_01_getting_started_with_terraform/aws.md)
 
 ## Estimated Time
 20 minutes

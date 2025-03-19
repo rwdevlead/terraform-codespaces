@@ -11,7 +11,7 @@ In this lab, you will expand your GitHub repository configuration by adding mult
 - Terraform installed
 - GitHub account with appropriate permissions
 - GitHub organization admin access
-- Completion of LAB-03-GH with existing repository configuration
+- Completion of [LAB-03-GH(https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_03_working_with_variables_and_dependencies/github.md)] with existing repository configuration
 
 ## Estimated Time
 30 minutes

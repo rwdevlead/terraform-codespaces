@@ -8,7 +8,7 @@ In this lab, you will learn how to work with Terraform state, use data sources t
 ## Prerequisites
 - Terraform installed
 - Azure account with appropriate permissions
-- Completion of LAB-04-AZ with existing Virtual Network configuration
+- Completion of [LAB-04-AZ](https://github.com/btkrausen/terraform-codespaces/blob/main/labs/lab_04_managing_mulitple_resources/azure.md) with existing Virtual Network configuration
 
 ## Estimated Time
 35 minutes
