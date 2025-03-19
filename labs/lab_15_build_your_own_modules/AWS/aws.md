@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will create your own local Terraform modules and use them to build AWS IAM resources. You'll create two modules - one for IAM policies and one for IAM roles - and then call these modules from a parent configuration. This lab teaches you how to build reusable modules, pass variables between modules, and organize your Terraform code efficiently. All resources created in this lab are part of the AWS free tier.
 
+[![Lab 15](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/aws_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -90,7 +92,7 @@ variable "environment" {
 
 Create the following files in the `modules/iam_policy` directory:
 
-#### a. Create `modules/iam_policy/variables.tf`:
+#### 5.1. Create `modules/iam_policy/variables.tf`:
 
 ```hcl
 variable "environment" {
@@ -118,7 +120,7 @@ variable "policy_statements" {
 }
 ```
 
-#### b. Create `modules/iam_policy/main.tf`:
+#### 5.2. Create `modules/iam_policy/main.tf`:
 
 ```hcl
 resource "aws_iam_policy" "policy" {
@@ -144,7 +146,7 @@ resource "aws_iam_policy" "policy" {
 }
 ```
 
-#### c. Create `modules/iam_policy/outputs.tf`:
+#### 5.3. Create `modules/iam_policy/outputs.tf`:
 
 ```hcl
 output "policy_arn" {
@@ -167,7 +169,7 @@ output "policy_id" {
 
 Create the following files in the `modules/iam_role` directory:
 
-#### a. Create `modules/iam_role/variables.tf`:
+#### 6.1. Create `modules/iam_role/variables.tf`:
 
 ```hcl
 variable "environment" {
@@ -197,7 +199,7 @@ variable "policy_arns" {
 }
 ```
 
-#### b. Create `modules/iam_role/main.tf`:
+#### 6.2. Create `modules/iam_role/main.tf`:
 
 ```hcl
 resource "aws_iam_role" "role" {
@@ -230,7 +232,7 @@ resource "aws_iam_role_policy_attachment" "policy_attachments" {
 }
 ```
 
-#### c. Create `modules/iam_role/outputs.tf`:
+#### 6.3. Create `modules/iam_role/outputs.tf`:
 
 ```hcl
 output "role_arn" {
@@ -333,7 +335,15 @@ output "role_names" {
 }
 ```
 
-### 9. Initialize and Apply
+### 9. Format all files in the current and subdirectories
+
+Run a terraform fmt but include all subdirectories as well - this will format our parent/calling module as well as all the files within our module directories:
+
+```bash
+terraform fmt -recursive
+```
+
+### 10. Initialize and Apply
 
 Initialize and apply the configuration:
 
@@ -345,11 +355,11 @@ terraform apply
 
 Watch how Terraform:
 - Processes each local module
-- Creates the IAM policies using the policy module
-- Creates the IAM roles using the role module
+- Creates the IAM policies using the `policy` module
+- Creates the IAM roles using the `role` module
 - Attaches the appropriate policies to each role
 
-### 10. Modify a Module to See Changes
+### 11. Modify a Module to See Changes
 
 Let's modify the IAM policy module to add some additional tags. 
 
@@ -375,8 +385,8 @@ resource "aws_iam_policy" "policy" {
   tags = {
     Environment = var.environment
     ManagedBy   = "Terraform"
-    Module      = "iam_policy"
-    Name        = "${var.environment}-${var.policy_name}"
+    Module      = "iam_policy"                                # <-- add the new tag here
+    Name        = "${var.environment}-${var.policy_name}"     # <-- add the new tag here
   }
 }
 ```
@@ -389,7 +399,7 @@ terraform apply
 
 Notice how Terraform detects the changes in the module and updates only the affected resources.
 
-### 11. Clean Up
+### 12. Clean Up
 
 Remove all created resources:
 
