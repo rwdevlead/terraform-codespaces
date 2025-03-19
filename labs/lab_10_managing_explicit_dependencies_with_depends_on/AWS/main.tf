@@ -1,3 +1,6 @@
+# Get ARN of user to use for S3 bucket policy
+data "aws_caller_identity" "current" {}
+
 # Random string for uniqueness
 resource "random_string" "suffix" {
   length  = 8
