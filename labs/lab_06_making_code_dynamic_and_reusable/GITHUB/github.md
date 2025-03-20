@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will examine an existing Terraform configuration with hardcoded values and refactor it to be more dynamic and reusable. You'll implement variables, data sources, and string interpolation to create a more flexible infrastructure definition. The lab uses GitHub free-tier features to ensure no costs are incurred.
 
+[![Lab 06](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -28,56 +30,8 @@ Note: GitHub credentials are required for this lab.
 
 The lab directory contains the following files with hardcoded values that we'll refactor:
 
-### main.tf
-```hcl
-# Static configuration with hardcoded values
-resource "github_repository" "production" {
-  name        = "production-application"
-  description = "Production application repository"
-  visibility  = "public"
-
-  has_issues      = true
-  has_wiki        = true
-  has_discussions = true
-
-  allow_merge_commit = true
-  allow_rebase_merge = true
-  allow_squash_merge = true
-
-  topics = [
-    "production",
-    "application",
-    "infrastructure"
-  ]
-}
-
-resource "github_team" "developers" {
-  name        = "production-developers"
-  description = "Production development team"
-  privacy     = "closed"
-}
-
-resource "github_team_repository" "team_access" {
-  team_id    = github_team.developers.id
-  repository = github_repository.production.name
-  permission = "push"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "github" {}
-```
+ - `main.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Hardcoded repository name and settings
@@ -98,7 +52,7 @@ export GITHUB_TOKEN="your_personal_access_token"
 
 ### 2. Create Variables File
 
-Create `variables.tf` to define variables that will replace hardcoded values:
+Add the following variable declarations to the `variables.tf` file to define variables that will replace hardcoded values:
 
 ```hcl
 variable "environment" {
@@ -143,11 +97,6 @@ Update `main.tf` to include data sources at the top of the file:
 data "github_user" "current" {
   username = ""
 }
-
-# Get information about the repository owner/organization
-data "github_organization" "current" {
-  name = "your-org-name"  # Update with your organization name
-}
 ```
 
 ### 4. Refactor Resources
@@ -155,37 +104,24 @@ data "github_organization" "current" {
 Replace the existing resources in `main.tf` with this dynamic configuration:
 
 ```hcl
-resource "github_repository" "dynamic" {
-  name        = "${var.environment}-${var.app_name}"
-  description = "${title(var.environment)} environment repository managed by ${data.github_user.current.login}"
+resource "github_repository" "production" {
+  name        = "${var.environment}-${var.app_name}"     # <-- update value here
+  description = "${title(var.environment)} environment repository managed by ${data.github_user.current.login}" # <-- update value here
   visibility  = "public"
 
-  has_issues      = var.repository_features.has_issues
-  has_wiki        = var.repository_features.has_wiki
-  has_discussions = var.repository_features.has_discussions
+  has_issues      = var.repository_features.has_issues        # <-- update value here
+  has_wiki        = var.repository_features.has_wiki          # <-- update value here
+  has_discussions = var.repository_features.has_discussions   # <-- update value here
 
   allow_merge_commit = true
   allow_rebase_merge = true
   allow_squash_merge = true
 
   topics = [
-    var.environment,
-    var.app_name,
+    var.environment,     # <-- update value here
+    var.app_name,        # <-- update value here
     "terraform-managed",
-    data.github_organization.current.name
   ]
-}
-
-resource "github_team" "dynamic" {
-  name        = "${var.environment}-${var.team_name}"
-  description = "${title(var.environment)} team managed by ${data.github_user.current.login}"
-  privacy     = "closed"
-}
-
-resource "github_team_repository" "team_access" {
-  team_id    = github_team.dynamic.id
-  repository = github_repository.dynamic.name
-  permission = "push"
 }
 ```
 
@@ -196,23 +132,12 @@ Create `outputs.tf` to display resource information:
 ```hcl
 output "repository_url" {
   description = "URL of the created repository"
-  value       = github_repository.dynamic.html_url
-}
-
-output "team_name" {
-  description = "Name of the created team"
-  value       = github_team.dynamic.name
+  value       = github_repository.production.html_url
 }
 
 output "creator_info" {
   description = "Information about who created the resources"
   value       = data.github_user.current.login
-}
-
-output "organization_info" {
-  description = "Organization billing information"
-  value       = "${data.github_organization.current.plan} (${data.github_organization.current.default_repository_permission})"
-  sensitive   = true
 }
 ```
 
@@ -223,7 +148,6 @@ Create `terraform.tfvars` to define environment-specific values:
 ```hcl
 environment = "development"
 app_name    = "terraform-demo"
-team_name   = "developers"
 repository_features = {
   has_issues      = true
   has_wiki        = false
@@ -248,7 +172,6 @@ Create a file called `staging.tfvars`:
 ```hcl
 environment = "staging"
 app_name    = "terraform-demo"
-team_name   = "reviewers"
 repository_features = {
   has_issues      = true
   has_wiki        = true
