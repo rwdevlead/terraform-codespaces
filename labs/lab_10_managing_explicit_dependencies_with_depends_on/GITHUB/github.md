@@ -3,6 +3,8 @@
 ## Overview
 This lab demonstrates how to use Terraform's `depends_on` meta-argument with GitHub resources. You'll learn when to use explicit dependencies versus relying on implicit dependencies, using free GitHub resources.
 
+[![Lab 10](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -28,90 +30,17 @@ Note: GitHub credentials are required for this lab.
 
 The lab directory contains the following initial files:
 
-### variables.tf
-```hcl
-variable "github_owner" {
-  description = "GitHub owner (organization or username)"
-  type        = string
-  default     = "your-github-username"  # Replace with your GitHub username or organization
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "repo_visibility" {
-  description = "Repository visibility"
-  type        = string
-  default     = "private"
-}
-
-variable "default_branch" {
-  description = "Default repository branch"
-  type        = string
-  default     = "main"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "github" {
-  owner = var.github_owner
-}
-```
-
-### main.tf
-```hcl
-# Base Repository
-resource "github_repository" "main" {
-  name        = "terraform-${var.environment}-repo"
-  description = "Terraform managed ${var.environment} repository"
-  visibility  = var.repo_visibility
-  auto_init   = true
-
-  topics = ["terraform", "depends-on-demo"]
-}
-
-# Repository File
-resource "github_repository_file" "readme" {
-  repository          = github_repository.main.name
-  branch              = var.default_branch
-  file                = "README.md"
-  content             = "# Terraform ${var.environment} Repository\n\nManaged by Terraform."
-  commit_message      = "Add README"
-  commit_author       = "Terraform"
-  commit_email        = "terraform@example.com"
-  overwrite_on_create = true
-}
-
-# Issue Label
-resource "github_issue_label" "bug" {
-  repository  = github_repository.main.name
-  name        = "bug"
-  color       = "FF0000"
-  description = "Bug reports"
-}
-```
+ - `main.tf`
+ - `providers.tf`
+ - `variables.tf`
 
 ## Lab Steps
 
 ### 1. Identify Implicit Dependencies
 
-Examine the main.tf file and identify the implicit dependencies:
-- Repository File depends on Repository (via repository attribute)
-- Issue Label depends on Repository (via repository attribute)
+Examine the `main.tf` file and identify the implicit dependencies:
+- Repository File depends on Repository (via repository attribute - line 13)
+- Issue Label depends on Repository (via repository attribute - line 25)
 
 ### 2. Initialize Terraform
 
@@ -133,58 +62,9 @@ terraform plan
 terraform apply
 ```
 
-Notice how Terraform automatically determines the correct order based on implicit dependencies.
+Notice how Terraform automatically determines the correct order based on implicit dependencies. It first creates the repository, then creates the other two resources in parallel.
 
-### 4. Add Branch Protection (Potential Dependency Issue)
-
-Add the following resource to main.tf:
-
-```hcl
-# Branch Protection Rule
-resource "github_branch_protection" "main" {
-  repository_id    = github_repository.main.node_id
-  pattern          = var.default_branch
-  enforce_admins   = true
-  
-  required_status_checks {
-    strict = true
-  }
-  
-  required_pull_request_reviews {
-    dismiss_stale_reviews = true
-    require_code_owner_reviews = true
-  }
-}
-```
-
-### 5. Add Team and Membership
-
-Add a team and membership that implicitly depend on the repository:
-
-```hcl
-# Team
-resource "github_team" "developers" {
-  name        = "${var.environment}-developers"
-  description = "Team for developers"
-  privacy     = "closed"
-}
-
-# Team Repository Access
-resource "github_team_repository" "developers_access" {
-  team_id    = github_team.developers.id
-  repository = github_repository.main.name
-  permission = "push"
-}
-```
-
-### 6. Apply the Changes
-
-Run terraform apply again:
-```bash
-terraform apply
-```
-
-### 7. Add Resources with Explicit Dependencies
+### 6. Add Resources with Explicit Dependencies
 
 Now, add the following resources that require explicit dependencies:
 
@@ -199,10 +79,10 @@ resource "github_repository_file" "contributing" {
   commit_author       = "Terraform"
   commit_email        = "terraform@example.com"
   overwrite_on_create = true
-  
+
   # Explicitly depend on branch protection rule
   # This ensures the branch is protected before adding files
-  depends_on = [github_branch_protection.main]
+  depends_on = [github_repository.main]
 }
 
 # Additional Label with explicit dependency
@@ -215,29 +95,7 @@ resource "github_issue_label" "enhancement" {
   # Explicitly depend on the first label and team access
   # This ensures labels are created in a specific order
   depends_on = [
-    github_issue_label.bug,
-    github_team_repository.developers_access
-  ]
-}
-
-# Repository Webhook with explicit dependency
-resource "github_repository_webhook" "ci" {
-  repository = github_repository.main.name
-  
-  configuration {
-    url          = "https://example.com/webhook"
-    content_type = "json"
-    insecure_ssl = false
-  }
-  
-  active = true
-  events = ["push", "pull_request"]
-  
-  # Explicitly depend on branch protection and contributing file
-  # This ensures the repository is fully configured before adding webhooks
-  depends_on = [
-    github_branch_protection.main,
-    github_repository_file.contributing
+    github_issue_label.bug
   ]
 }
 ```
@@ -281,7 +139,7 @@ output "dependency_example" {
   description = "Example of dependencies in this lab"
   value = {
     "Implicit dependencies" = "Repository -> Repository File, Repository -> Issue Label, Team -> Team Repository Access"
-    "Explicit dependencies" = "Branch Protection -> Contributing File, Label/Team Access -> Enhancement Label, Branch Protection/Files -> Webhook"
+    "Explicit dependencies" = "Label/Team Access -> Enhancement Label, Files"
   }
 }
 ```
