@@ -8,6 +8,4 @@ terraform {
   }
 }
 
-provider "github" {
-  owner = var.organization
-}
+provider "github" {}

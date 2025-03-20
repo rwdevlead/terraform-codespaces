@@ -28,127 +28,9 @@ Note: GitHub credentials are required for this lab.
 
 The lab directory contains the following files with repetitive code that we'll refactor:
 
-### main.tf
-```hcl
-# Static configuration with repetitive elements
-resource "github_repository" "app" {
-  name        = "production-application"
-  description = "Production application repository"
-  visibility  = "public"
-
-  has_issues      = true
-  has_wiki        = true
-  has_discussions = true
-  has_projects    = true
-
-  allow_merge_commit = true
-  allow_rebase_merge = true
-  allow_squash_merge = true
-
-  delete_branch_on_merge = true
-  auto_init              = true
-
-  topics = [
-    "production",
-    "application",
-    "terraform-demo",
-    "infrastructure-team"
-  ]
-}
-
-resource "github_repository" "docs" {
-  name        = "production-documentation"
-  description = "Production documentation repository"
-  visibility  = "public"
-
-  has_issues      = true
-  has_wiki        = true
-  has_discussions = true
-  has_projects    = true
-
-  allow_merge_commit = true
-  allow_rebase_merge = true
-  allow_squash_merge = true
-
-  delete_branch_on_merge = true
-  auto_init              = true
-
-  topics = [
-    "production",
-    "documentation",
-    "terraform-demo",
-    "infrastructure-team"
-  ]
-}
-
-resource "github_team" "developers" {
-  name        = "production-developers"
-  description = "Production development team"
-  privacy     = "closed"
-}
-
-resource "github_team" "reviewers" {
-  name        = "production-reviewers"
-  description = "Production code reviewers team"
-  privacy     = "closed"
-}
-
-resource "github_team_repository" "app_developers" {
-  team_id    = github_team.developers.id
-  repository = github_repository.app.name
-  permission = "push"
-}
-
-resource "github_team_repository" "app_reviewers" {
-  team_id    = github_team.reviewers.id
-  repository = github_repository.app.name
-  permission = "maintain"
-}
-
-resource "github_team_repository" "docs_developers" {
-  team_id    = github_team.developers.id
-  repository = github_repository.docs.name
-  permission = "push"
-}
-
-resource "github_team_repository" "docs_reviewers" {
-  team_id    = github_team.reviewers.id
-  repository = github_repository.docs.name
-  permission = "maintain"
-}
-```
-
-### variables.tf
-```hcl
-variable "organization" {
-  description = "GitHub organization name"
-  type        = string
-  default     = "your-organization"  # Replace with your org name
-}
-
-variable "environment" {
-  description = "Environment name for resource naming"
-  type        = string
-  default     = "production"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 6.5.0"
-    }
-  }
-}
-
-provider "github" {
-  owner = var.organization
-}
-```
+- `main.tf`
+- `variables.tf`
+- `providers.tf`
 
 Examine these files and notice:
 - Repeated repository configurations
@@ -180,7 +62,7 @@ data "github_user" "current" {
 
 ### 3. Create Locals Block
 
-Add a locals block at the top of `main.tf` (after the data source):
+Add a locals block at the top of `main.tf` (after the `data` source):
 
 ```hcl
 locals {
@@ -222,79 +104,42 @@ Replace the resources in `main.tf` with these refactored versions:
 
 ```hcl
 resource "github_repository" "app" {
-  name        = "${local.name_prefix}application"
-  description = "${title(var.environment)} application repository. ${local.managed_by}"
+  name        = "${local.name_prefix}application"   # <-- update value here
+  description = "${title(var.environment)} application repository. ${local.managed_by}"   # <-- update value here
   visibility  = "public"
 
-  has_issues      = local.repo_features.has_issues
-  has_wiki        = local.repo_features.has_wiki
-  has_discussions = local.repo_features.has_discussions
-  has_projects    = local.repo_features.has_projects
+  has_issues      = local.repo_features.has_issues       # <-- update value here
+  has_wiki        = local.repo_features.has_wiki         # <-- update value here
+  has_discussions = local.repo_features.has_discussions  # <-- update value here
 
-  allow_merge_commit     = local.merge_settings.allow_merge_commit
-  allow_rebase_merge     = local.merge_settings.allow_rebase_merge
-  allow_squash_merge     = local.merge_settings.allow_squash_merge
-  delete_branch_on_merge = local.merge_settings.delete_branch_on_merge
+  allow_merge_commit     = local.merge_settings.allow_merge_commit       # <-- update value here
+  allow_rebase_merge     = local.merge_settings.allow_rebase_merge       # <-- update value here
+  allow_squash_merge     = local.merge_settings.allow_squash_merge       # <-- update value here
   
-  auto_init = local.repo_features.auto_init
+  delete_branch_on_merge = local.merge_settings.delete_branch_on_merge   # <-- update value here
+  auto_init              = local.repo_features.auto_init                 # <-- update value here
 
-  topics = concat(local.common_topics, ["application"])
+  topics = concat(local.common_topics, ["application"])                  # <-- update value here
 }
 
 resource "github_repository" "docs" {
   name        = "${local.name_prefix}documentation"
-  description = "${title(var.environment)} documentation repository. ${local.managed_by}"
+  description = "${title(var.environment)} documentation repository. ${local.managed_by}"   # <-- update value here
   visibility  = "public"
 
-  has_issues      = local.repo_features.has_issues
-  has_wiki        = local.repo_features.has_wiki
-  has_discussions = local.repo_features.has_discussions
-  has_projects    = local.repo_features.has_projects
+  has_issues      = local.repo_features.has_issues       # <-- update value here
+  has_wiki        = local.repo_features.has_wiki         # <-- update value here
+  has_discussions = local.repo_features.has_discussions  # <-- update value here
 
-  allow_merge_commit     = local.merge_settings.allow_merge_commit
-  allow_rebase_merge     = local.merge_settings.allow_rebase_merge
-  allow_squash_merge     = local.merge_settings.allow_squash_merge
-  delete_branch_on_merge = local.merge_settings.delete_branch_on_merge
+  allow_merge_commit     = local.merge_settings.allow_merge_commit       # <-- update value here
+  allow_rebase_merge     = local.merge_settings.allow_rebase_merge       # <-- update value here
+  allow_squash_merge     = local.merge_settings.allow_squash_merge       # <-- update value here
   
-  auto_init = local.repo_features.auto_init
+  delete_branch_on_merge = local.merge_settings.delete_branch_on_merge   # <-- update value here
+  
+  auto_init = local.repo_features.auto_init                              # <-- update value here
 
-  topics = concat(local.common_topics, ["documentation"])
-}
-
-resource "github_team" "developers" {
-  name        = "${local.name_prefix}developers"
-  description = "${title(var.environment)} development team. ${local.managed_by}"
-  privacy     = "closed"
-}
-
-resource "github_team" "reviewers" {
-  name        = "${local.name_prefix}reviewers"
-  description = "${title(var.environment)} code reviewers team. ${local.managed_by}"
-  privacy     = "closed"
-}
-
-resource "github_team_repository" "app_developers" {
-  team_id    = github_team.developers.id
-  repository = github_repository.app.name
-  permission = "push"
-}
-
-resource "github_team_repository" "app_reviewers" {
-  team_id    = github_team.reviewers.id
-  repository = github_repository.app.name
-  permission = "maintain"
-}
-
-resource "github_team_repository" "docs_developers" {
-  team_id    = github_team.developers.id
-  repository = github_repository.docs.name
-  permission = "push"
-}
-
-resource "github_team_repository" "docs_reviewers" {
-  team_id    = github_team.reviewers.id
-  repository = github_repository.docs.name
-  permission = "maintain"
+  topics = concat(local.common_topics, ["documentation"])                # <-- update value here
 }
 ```
 
@@ -311,16 +156,6 @@ output "app_repo_url" {
 output "docs_repo_url" {
   description = "URL of the documentation repository"
   value       = github_repository.docs.html_url
-}
-
-output "developers_team_id" {
-  description = "ID of the developers team"
-  value       = github_team.developers.id
-}
-
-output "reviewers_team_id" {
-  description = "ID of the reviewers team"
-  value       = github_team.reviewers.id
 }
 
 output "current_user" {
@@ -386,11 +221,14 @@ locals {
 }
 ```
 
-2. Create a new `terraform.tfvars` file to change the environment:
+2. Modify the `variables` file to change the environment:
 
 ```hcl
-organization = "your-organization"  # Replace with your actual org name
-environment = "dev"
+variable "environment" {
+  description = "Environment name for resource naming"
+  type        = string
+  default     = "dev"      # <-- Changed from "production" to "dev"
+}
 ```
 
 3. Apply the changes and observe the results:
