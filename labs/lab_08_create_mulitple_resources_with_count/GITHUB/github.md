@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use Terraform's `count` meta-argument to create multiple similar resources efficiently. You'll start with a configuration that creates individual resources and refactor it to create multiple resources using count. The lab uses GitHub resources that are available with free GitHub accounts.
 
+[![Lab 08](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -26,121 +28,11 @@ Note: GitHub credentials are required for this lab.
 
 ## Existing Configuration Files
 
-The lab directory contains the following files with repetitive resource creation that we'll refactor using count:
+The lab directory contains the following files with repetitive resource creation that we'll refactor using `count`:
 
-### main.tf
-```hcl
-# Individual Repository Resources
-resource "github_repository" "repo1" {
-  name        = "example-repo-1"
-  description = "Example repository 1"
-  visibility  = "public"
-  auto_init   = true
-
-  topics = ["example", "terraform", "repo1"]
-}
-
-resource "github_repository" "repo2" {
-  name        = "example-repo-2"
-  description = "Example repository 2"
-  visibility  = "public"
-  auto_init   = true
-
-  topics = ["example", "terraform", "repo2"]
-}
-
-resource "github_repository" "repo3" {
-  name        = "example-repo-3"
-  description = "Example repository 3"
-  visibility  = "public"
-  auto_init   = true
-
-  topics = ["example", "terraform", "repo3"]
-}
-
-# Individual Branch Protection Resources
-resource "github_branch_protection" "protection1" {
-  repository_id = github_repository.repo1.node_id
-  pattern       = "main"
-
-  allows_deletions                = false
-  allows_force_pushes             = false
-  require_conversation_resolution = true
-}
-
-resource "github_branch_protection" "protection2" {
-  repository_id = github_repository.repo2.node_id
-  pattern       = "main"
-
-  allows_deletions                = false
-  allows_force_pushes             = false
-  require_conversation_resolution = true
-}
-
-resource "github_branch_protection" "protection3" {
-  repository_id = github_repository.repo3.node_id
-  pattern       = "main"
-
-  allows_deletions                = false
-  allows_force_pushes             = false
-  require_conversation_resolution = true
-}
-
-# Individual Issue Label Resources
-resource "github_issue_label" "bug1" {
-  repository  = github_repository.repo1.name
-  name        = "bug"
-  color       = "FF0000"
-  description = "Bug issues"
-}
-
-resource "github_issue_label" "feature1" {
-  repository  = github_repository.repo1.name
-  name        = "feature"
-  color       = "00FF00"
-  description = "Feature requests"
-}
-
-resource "github_issue_label" "bug2" {
-  repository  = github_repository.repo2.name
-  name        = "bug"
-  color       = "FF0000"
-  description = "Bug issues"
-}
-
-resource "github_issue_label" "feature2" {
-  repository  = github_repository.repo2.name
-  name        = "feature"
-  color       = "00FF00"
-  description = "Feature requests"
-}
-```
-
-### variables.tf
-```hcl
-variable "organization" {
-  description = "GitHub organization name"
-  type        = string
-  default     = "your-organization"  # Replace with your org name or username
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "github" {
-  owner = var.organization
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Individual repository resources with similar configuration
@@ -160,15 +52,9 @@ export GITHUB_TOKEN="your_personal_access_token"
 
 ### 2. Update Variables for Count
 
-Modify `variables.tf` to include variables that will work with count:
+Add the following to the `variables.tf` file to include variables that will work with `count`:
 
 ```hcl
-variable "organization" {
-  description = "GitHub organization name"
-  type        = string
-  default     = "your-organization"  # Replace with your org name or username
-}
-
 variable "repo_count" {
   description = "Number of repositories to create"
   type        = number
@@ -223,6 +109,8 @@ resource "github_repository" "repo" {
 }
 ```
 
+Since we're changing the `github_repository` configuration, comment out or just delete the `github_branch_protection` and `github_issue_label` resource blocks since they will **NOT** work with our refactored `github_repository` resource block now.
+
 ### 4. Apply and Test Repository Count
 
 Initialize and apply the configuration:
@@ -233,11 +121,11 @@ terraform plan
 terraform apply
 ```
 
-Verify that three repositories are created with the correct names and descriptions.
+Verify that three repositories are created with the correct names and descriptions. This is all due to the count argument that was added to the `github_repository` block. Pretty cool!
 
 ### 5. Adjust Repository Count
 
-Modify the repo_count variable in `terraform.tfvars` (create this file) to test different repository counts:
+Create the  `terraform.tfvars` file and add the following to test different repository counts:
 
 ```hcl
 repo_count = 2
@@ -250,11 +138,11 @@ terraform plan
 terraform apply
 ```
 
-Notice how Terraform plans to destroy one repository, maintaining only the number specified in the count.
+Notice how Terraform plans to destroy one repository, maintaining only the number specified in the `count`.
 
-### 6. Refactor Branch Protection Using Count
+### 6. Refactor Branch Protection Using `Count`
 
-Next, replace the individual branch protection resources with a count-based approach:
+Next, replace the individual branch protection resources with a count-based approach - add the following block to `main.tf`:
 
 ```hcl
 # Refactored Branch Protection resources using count
@@ -276,22 +164,9 @@ terraform plan
 terraform apply
 ```
 
-### 7. Refactor Issue Labels Using Nested Counts
+Verify that two `github_branch_protection` resources are created for each of the two GitHub repositories created in the previous block. Notice this will always create the same number of resources since it's also using the `var.repo_count` to determine how many resources to create and then it applies the configuration to the respective repository. 
 
-For a more complex example, refactor the issue label resources using nested counts:
-
-```hcl
-# Refactored Issue Label Resources
-resource "github_issue_label" "label" {
-  count       = 4  # 2 labels for 2 repos = 4 labels
-  repository  = github_repository.repo[count.index % 2].name  # Alternates between repo[0] and repo[1]
-  name        = var.label_names[count.index / 2]  # First 2 are "bug", next 2 are "feature"
-  color       = var.label_colors[count.index / 2]
-  description = var.label_descriptions[count.index / 2]
-}
-```
-
-### 8. Create Outputs Using Count
+### 7. Create Outputs Using Count
 
 Create an `outputs.tf` file to demonstrate how to reference count-based resources:
 
@@ -310,14 +185,9 @@ output "protection_repository_ids" {
   description = "IDs of repositories with branch protection"
   value       = github_branch_protection.protection[*].repository_id
 }
-
-output "label_repositories" {
-  description = "Repositories with labels"
-  value       = distinct(github_issue_label.label[*].repository)
-}
 ```
 
-### 9. Create README Files with Count
+### 8. Create README Files with Count
 
 Add this to `variables.tf`:
 ```hcl
@@ -344,7 +214,7 @@ resource "github_repository_file" "readme" {
 }
 ```
 
-Apply the configuration with different readme counts:
+Apply the configuration with different `readme` counts:
 
 ```bash
 # Set readme_count to 1
