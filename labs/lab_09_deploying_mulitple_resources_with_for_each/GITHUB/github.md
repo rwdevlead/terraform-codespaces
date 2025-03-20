@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use Terraform's `for_each` meta-argument to create and manage multiple GitHub resources efficiently. You'll discover how `for_each` differs from `count` and when to use each approach. The lab uses free GitHub resources to ensure no costs are incurred.
 
+[![Lab 09](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -29,84 +31,10 @@ Note: GitHub credentials are required for this lab.
 
 The lab directory contains the following files with resources created using `count` that we'll refactor to use `for_each`:
 
-### main.tf
-```hcl
-# Repositories created with count
-resource "github_repository" "repo_count" {
-  count       = 3
-  name        = "repo-count-${count.index + 1}"
-  description = "Repository ${count.index + 1} created with count"
-  visibility  = "public"
-  auto_init   = true
-
-  topics = ["terraform", "count", "example"]
-}
-
-# Branch protection rules created with count
-resource "github_branch_protection" "protection_count" {
-  count         = 3
-  repository_id = github_repository.repo_count[count.index].node_id
-  pattern       = "main"
-
-  allows_deletions                = false
-  allows_force_pushes             = false
-  require_conversation_resolution = true
-}
-
-# Issue labels created with count
-resource "github_issue_label" "label_count" {
-  count       = 6 # 2 labels for each of 3 repos
-  repository  = github_repository.repo_count[count.index % 3].name
-  name        = count.index < 3 ? "bug" : "feature"
-  color       = count.index < 3 ? "FF0000" : "00FF00"
-  description = count.index < 3 ? "Bug issues" : "Feature requests"
-}
-```
-
-### variables.tf
-```hcl
-variable "organization" {
-  description = "GitHub organization name"
-  type        = string
-  default     = "your-organization"  # Replace with your org name or username
-}
-
-variable "repo_names" {
-  description = "Names for repositories"
-  type        = list(string)
-  default     = ["repo-1", "repo-2", "repo-3"]
-}
-
-variable "label_names" {
-  description = "Names for issue labels"
-  type        = list(string)
-  default     = ["bug", "feature"]
-}
-
-variable "label_colors" {
-  description = "Colors for issue labels"
-  type        = list(string)
-  default     = ["FF0000", "00FF00"]
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = ">= 6.0"
-    }
-  }
-}
-
-provider "github" {
-  owner = var.organization
-}
-```
-
+ - `main.tf`
+ - `providers.tf`
+ - `variables.tf`
+ 
 Examine these files and notice:
 - Repository creation using count and numeric indexing
 - Branch protection rules using count and referencing repositories by index
@@ -125,16 +53,10 @@ export GITHUB_TOKEN="your_personal_access_token"
 
 ### 2. Update Variables for For_Each
 
-Modify `variables.tf` to include map variables for use with for_each:
+Modify `variables.tf` to include map variables for use with `for_each`:
 
 ```hcl
-variable "organization" {
-  description = "GitHub organization name"
-  type        = string
-  default     = "your-organization"  # Replace with your org name or username
-}
-
-# Keep the list variables for comparison
+# Keep the list variables to compare to the new variables you will add below
 variable "repo_names" {
   description = "Names for repositories"
   type        = list(string)
@@ -173,13 +95,13 @@ variable "label_config" {
 }
 ```
 
-### 3. Keep Count-Based Resources
+### 3. Keep `Count`-Based Resources
 
-Leave the count-based resources in place for comparison.
+Leave the `count`-based resources in place for comparison.
 
-### 4. Add Repository Resources Using For_Each
+### 4. Add Repository Resources Using `For_Each`
 
-Add new repository resources using for_each to `main.tf`:
+Add new repository resources using `for_each` to `main.tf`:
 
 ```hcl
 # Repositories created with for_each
@@ -204,13 +126,17 @@ terraform plan
 terraform apply
 ```
 
-Compare the count-based and for_each-based repositories in GitHub:
-- Notice how the for_each repositories have meaningful names based on map keys
+Compare the difference between the `count`-based and `for_each`-based repositories in GitHub:
+- Notice how the `for_each` repositories have meaningful names based on map keys
 - Observe how the resources are referenced differently in the state file
 
-### 6. Add Branch Protection Rules Using For_Each
+To get a better look, use the `terraform state list` command to display the resources managed in state. See how the `for_each` have meaningful names, where the `count`-based resources are named based on the index.
 
-Create a cross-product of repositories and branch patterns with nested for_each:
+> If you get the error `403 Resource not accessible by personal access token []`, make sure your token has sufficient permissions to your account. For `labels`, make sure you have write permissions to `Issues`.
+
+### 6. Add Branch Protection Rules Using `For_Each`
+
+Create a cross-product of repositories and branch patterns with nested `for_each`:
 
 ```hcl
 # Branch protection rules created with for_each
@@ -242,7 +168,7 @@ terraform plan
 terraform apply
 ```
 
-### 7. Add Issue Label Resources Using For_Each
+### 7. Add Issue Label Resources Using `For_Each`
 
 Add labels to the "api" and "web" repositories:
 
@@ -273,7 +199,9 @@ terraform plan
 terraform apply
 ```
 
-### 8. Create Repository Files Using For_Each
+Notice how the `key` here is the name of the label and the `value` is the color of the label (found in the GitHub UI). This combination is determined by the variable `var.label_config` since that's what these resource blocks are iterating over using `for_each`.
+
+### 8. Create Repository Files Using `For_Each`
 
 Add a new map variable for repository files:
 
@@ -349,7 +277,7 @@ terraform apply
 
 Let's demonstrate the advantage of for_each when removing or renaming resources:
 
-1. Modify the repositories variable to remove one repository:
+1. Modify the `repositories` variable to remove **one** repository:
 
 ```hcl
 variable "repositories" {
@@ -363,13 +291,13 @@ variable "repositories" {
 }
 ```
 
-2. Also modify the repo_names list to remove an element:
+2. Also modify the `repo_names` list to remove an element:
 
 ```hcl
 variable "repo_names" {
   description = "Names for repositories"
   type        = list(string)
-  default     = ["repo-1", "repo-2"] # Removed the third element
+  default     = ["repo-1", "repo-2"] # <-- Removed the third element
 }
 ```
 
@@ -385,7 +313,7 @@ Notice how:
 
 ### 11. Add a New Resource to Existing Map
 
-Add a new entry to the label_config map:
+Add a new entry to the `label_config` map:
 
 ```hcl
 variable "label_config" {
@@ -396,7 +324,7 @@ variable "label_config" {
     "feature" = "00FF00"
     "docs"    = "0000FF"
     "test"    = "FFFF00"
-    "security" = "FF00FF" # Added new entry
+    "security" = "FF00FF" # <-- Added new entry
   }
 }
 ```
@@ -418,9 +346,9 @@ Remove all created resources:
 terraform destroy
 ```
 
-## Understanding For_Each
+## Understanding `For_Each`
 
-Let's examine how for_each improves your Terraform configurations:
+Let's examine how `for_each` improves your Terraform configurations:
 
 ### For_Each vs Count
 - **For_Each**: Resources are indexed by key (string) instead of numeric index
