@@ -18,15 +18,3 @@ resource "github_repository" "production" {
     "infrastructure"
   ]
 }
-
-resource "github_team" "developers" {
-  name        = "production-developers"
-  description = "Production development team"
-  privacy     = "closed"
-}
-
-resource "github_team_repository" "team_access" {
-  team_id    = github_team.developers.id
-  repository = github_repository.production.name
-  permission = "push"
-}
