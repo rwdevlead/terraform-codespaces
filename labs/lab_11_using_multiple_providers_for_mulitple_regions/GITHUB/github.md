@@ -1,247 +1,251 @@
-# LAB-11-GH: Deploying Resources to Multiple Organizations
-
+# LAB-11-GH: GitHub Multi-Provider Authentication Lab
 ## Overview
-This lab demonstrates how to use multiple provider blocks in Terraform to deploy GitHub resources to different organizations or user accounts simultaneously. You'll create resources under two different GitHub owners using a simple configuration.
+This lab demonstrates how to use multiple provider blocks in Terraform with different authentication tokens to manage GitHub resources. You'll create two GitHub provider configurations with different permission levels - one with full repository access and one with read-only access - to understand how provider authentication impacts resource creation.
+
+[![Lab 11](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
 
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
 - Terraform installed
-- Multiple GitHub accounts or organizations
-- GitHub personal access tokens for each account
+- A GitHub account
+- Two GitHub personal access tokens (one with full repo access, one read-only)
 - Basic understanding of Terraform and GitHub concepts
 
-Note: GitHub credentials are required for this lab.
-
 ## How to Use This Hands-On Lab
-
 1. **Create a Codespace** from this repo (click the button below).  
 2. Once the Codespace is running, open the integrated terminal.
-3. Follow the instructions in each **lab** to complete the exercises.
+3. Follow the instructions to create the required tokens and complete the exercises.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
 
 ## Estimated Time
-10 minutes
+15 minutes
 
-## Existing Configuration Files
+> Note: for GitHub, this lab was a little harder to create because most people may not have access to multiple accounts nor organizations. So I simplified it to use a single account but still have you go through the exercises using mulitple tokens so you can see how this feature would work.
 
-The lab directory contains the following initial files:
+## Creating GitHub Tokens
+For this lab, you'll need to create two GitHub personal access tokens:
 
-### variables.tf
-```hcl
-variable "primary_owner" {
-  description = "Primary GitHub owner (organization or username)"
-  type        = string
-  default     = "your-primary-account"  # Replace with your primary GitHub username or organization
-}
+1. **Full Access Token**: With complete repository permissions
+2. **Read-Only Token**: With only read access to repositories
 
-variable "secondary_owner" {
-  description = "Secondary GitHub owner (organization or username)"
-  type        = string
-  default     = "your-secondary-account"  # Replace with your secondary GitHub username or organization
-}
+### Creating a Full Access Token:
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token" → "Generate new token (classic)"
+3. Name it "terraform-full-access"
+4. Set expiration to 7 days
+5. Select the following permissions:
+   - `repo` (all repo permissions)
+6. Click "Generate token" and copy the token
 
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "repo_visibility" {
-  description = "Repository visibility"
-  type        = string
-  default     = "private"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.0"
-    }
-  }
-}
-
-# Primary owner provider
-provider "github" {
-  owner = var.primary_owner
-  alias = "primary"
-}
-
-# Secondary owner provider
-provider "github" {
-  owner = var.secondary_owner
-  alias = "secondary"
-}
-```
-
-### main.tf
-```hcl
-# Repository for primary owner
-resource "github_repository" "primary" {
-  provider    = github.primary
-  name        = "terraform-${var.environment}-primary"
-  description = "Terraform managed repository for ${var.environment} environment"
-  visibility  = var.repo_visibility
-  auto_init   = true
-
-  topics = ["terraform", "multi-provider-demo"]
-}
-
-# Repository for secondary owner
-resource "github_repository" "secondary" {
-  provider    = github.secondary
-  name        = "terraform-${var.environment}-secondary"
-  description = "Terraform managed repository for ${var.environment} environment"
-  visibility  = var.repo_visibility
-  auto_init   = true
-
-  topics = ["terraform", "multi-provider-demo"]
-}
-```
+### Creating a Read-Only Token:
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token" → "Generate new token (classic)" 
+3. Name it "terraform-read-only"
+4. Set expiration to 7 days
+5. Select only these permissions:
+   - `repo:status`
+   - `public_repo`
+   - `repo_deployment`
+6. Click "Generate token" and copy the token
 
 ## Lab Steps
 
-### 1. Initialize Terraform
+### 1. Set Up Environment Variables
+Set your GitHub tokens as environment variables on the command line:
 
-Set up your GitHub tokens as environment variables:
 ```bash
-export GITHUB_TOKEN="your-primary-account-token"
-export GITHUB_SECONDARY_TOKEN="your-secondary-account-token"
+export TF_VAR_github_token_full="your-full-access-token"
+export TF_VAR_github_token_readonly="your-read-only-token"
 ```
 
-Configure the .terraformrc file to support multiple tokens:
-```bash
-cat > ~/.terraformrc << EOF
-credentials "github.com" {
-  token = "$GITHUB_TOKEN"
+### 2. Create Provider Configuration
+Update the file named `providers.tf` with the following content:
+
+```hcl
+# Provider that uses full access token
+provider "github" {
+  alias = "full_access"
+  token = var.github_token_full
 }
-credentials "secondary.github.com" {
-  token = "$GITHUB_SECONDARY_TOKEN"
+
+# Provider that uses read-only token
+provider "github" {
+  alias = "read_only"
+  token = var.github_token_readonly
 }
-EOF
 ```
 
-Initialize your Terraform workspace:
+### 3. Create Variables File
+Add the following variable declarations to `variables.tf`:
+
+```hcl
+variable "github_token_full" {
+  description = "GitHub Personal Access Token with full repository access"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_token_readonly" {
+  description = "GitHub Personal Access Token with read-only access"
+  type        = string
+  sensitive   = true
+}
+
+variable "repo_name" {
+  description = "Name of the GitHub repository to be created"
+  type        = string
+  default     = "terraform-repo-for-alias-demo"
+}
+```
+
+### 4. Create Main Configuration
+Add the following resource blocks to the `main.tf` file to build our GitHub resources:
+
+```hcl
+# Repository created with the full access provider
+resource "github_repository" "full_access_repo" {
+  name        = var.repo_name
+  description = "Repository created with full access token"
+  visibility  = "public"
+  auto_init   = true
+}
+
+# Add a README file using the full access provider
+resource "github_repository_file" "readme" {
+  repository        = github_repository.full_access_repo.name
+  branch            = "main"
+  file              = "README.md"
+  content           = "# Provider Demo Repo\n\nThis repos demonstrates Terraform provider configs with different auth tokens."
+  commit_message    = "Add README"
+  commit_author     = "Terraform"
+  commit_email      = "terraform@example.com"
+  overwrite_on_create = true
+}
+```
+
+For each `resource` blocks above, add the following argument to tell Terraform what provider to use - I usually put this as the first argument so it's easy to quickly see what providers my different resources are using.
+
+```hcl
+  provider = github.full_access
+```
+
+### 5. Initialize Terraform and Create First Resources
+Run the following commands:
+
 ```bash
+terraform fmt
 terraform init
+terraform apply -auto-approve
 ```
 
-### 2. Examine the Provider Configuration
+This will create a repository using the full access token.
 
-Notice how the provider blocks are configured in providers.tf:
-- The primary provider with an alias of "primary"
-- The secondary provider with an alias of "secondary"
+> Reminder: If you get the error `403 Resource not accessible by personal access token []`, make sure your token has sufficient permissions to your account. For `github_repository_file`, make sure you have write permissions to `Contents`.
 
-### 3. Examine the Resource Configuration
+### 6. Try Using the Read-Only Token
 
-Look at how resources specify which provider to use:
-- `provider = github.primary` for resources in the primary account
-- `provider = github.secondary` for resources in the secondary account
+Now, attempt to create a branch using the read-only token. This will fail due to permission limitations.
 
-### 4. Run Plan and Apply
-
-Create the repositories in both accounts:
-```bash
-terraform plan
-terraform apply
-```
-
-### 5. Add README Files to Each Repository
-
-Add the following resources to main.tf:
+Add the following to your `main.tf` file:
 
 ```hcl
-# README file for primary repository
-resource "github_repository_file" "primary_readme" {
-  provider          = github.primary
-  repository        = github_repository.primary.name
-  branch            = "main"
-  file              = "README.md"
-  content           = "# Primary Repository\n\nManaged by Terraform using multiple providers."
-  commit_message    = "Add README"
-  commit_author     = "Terraform"
-  commit_email      = "terraform@example.com"
-  overwrite_on_create = true
-}
-
-# README file for secondary repository
-resource "github_repository_file" "secondary_readme" {
-  provider          = github.secondary
-  repository        = github_repository.secondary.name
-  branch            = "main"
-  file              = "README.md"
-  content           = "# Secondary Repository\n\nManaged by Terraform using multiple providers."
-  commit_message    = "Add README"
-  commit_author     = "Terraform"
-  commit_email      = "terraform@example.com"
-  overwrite_on_create = true
+resource "github_branch" "read_only_branch" {
+  provider      = github.read_only
+  repository    = github_repository.full_access_repo.name
+  branch        = "read-only-branch"
+  source_branch = "main"
 }
 ```
 
-### 6. Apply the Changes
+### 7. Apply the Changes and Observe Failure
+Run the apply command again:
 
-Apply the configuration to create the README files:
 ```bash
 terraform apply
 ```
 
-### 7. Create outputs.tf
+This should fail with an error message indicating insufficient permissions when using the read-only token.
 
-Create an outputs.tf file:
+### 8. Try Reading Repository Information
+Update the failed resource to something that should work with read-only access. Replace the branch resource with a data block:
 
 ```hcl
-output "primary_repository_url" {
-  description = "URL of the repository in the primary account"
-  value       = github_repository.primary.html_url
-}
+# Remove the failed branch resource created above
 
-output "secondary_repository_url" {
-  description = "URL of the repository in the secondary account"
-  value       = github_repository.secondary.html_url
-}
-
-output "primary_owner" {
-  description = "Primary GitHub owner"
-  value       = var.primary_owner
-}
-
-output "secondary_owner" {
-  description = "Secondary GitHub owner"
-  value       = var.secondary_owner
+# This will work with the read-only token
+data "github_repository" "read_only_repo" {
+  provider = github.read_only
+  name     = github_repository.full_access_repo.name
 }
 ```
 
-### 8. Apply to See Outputs
+Add an `outputs.tf` file and add the following output block to output information from the data block:
+
+```hcl
+output "repo_details_read_only" {
+  description = "Repository details retrieved with read-only token"
+  value = {
+    name        = data.github_repository.read_only_repo.name
+    description = data.github_repository.read_only_repo.description
+    url         = data.github_repository.read_only_repo.html_url
+  }
+}
+```
+
+### 9. Apply Again to See It Work
+Run:
+
 ```bash
 terraform apply
 ```
 
-### 9. Clean Up Resources
+Now you should see both outputs work successfully, as reading repository information is allowed with the read-only token.
 
+### 10. Experiment with Swapping Tokens
+As a final experiment, try changing your `main.tf` to use the read-only token for creating resources:
+
+```hcl
+resource "github_repository" "full_access_repo" {
+  provider    = github.read_only                    # <--- change the value to github.read_only
+  name        = var.repo_name
+  description = "Repository created with full access token"
+  visibility  = "public"
+  auto_init   = true
+}
+```
+
+### 11. Apply and Observe Failure
+Run:
+
+```bash
+terraform apply
+```
+
+This should fail, demonstrating that the read-only token doesn't have permission to create repositories. Note that since the repository was already created, you might need to run a `terraform destroy` with the `github.full_access` provider first to see the error.
+
+### 13. Clean Up Resources
 When you're done, clean up all resources:
+
 ```bash
 terraform destroy
 ```
 
-## Understanding Multiple Provider Configuration
+## Understanding Provider Authentication
+This lab demonstrates several important concepts:
 
-### Provider Aliases
-- Provider aliases allow you to define multiple configurations for the same provider
-- Each provider block can have its own configuration (owner, tokens, etc.)
-- Use the `alias` attribute to name each provider configuration
+1. **Different Authentication per Provider**: Each provider alias can use its own authentication credentials
+2. **Permission Levels**: Different tokens with different permission scopes affect what operations can be performed
+3. **Provider Selection**: Resources specify which provider to use with the `provider = github.<alias>` syntax
+4. **Operation Types**: Some operations (like reading) work with limited permissions, while others (like creating resources) require higher permission levels
 
-### Specifying Providers for Resources
-- Use the `provider` attribute in resource blocks to specify which provider to use
-- Format is `provider = github.<alias>`
-- If no provider is specified, the default provider (without an alias) is used
+## Real-World Applications
+In real-world scenarios, you might use multiple provider configurations with different authentication levels to:
 
-### Authentication with Multiple GitHub Accounts
-- Each provider configuration can use different authentication tokens
-- For automated workflows, you'll need to manage multiple GitHub tokens
-- For local development, you can use the .terraformrc file to manage credentials
+1. Implement least-privilege access for different types of resources
+2. Separate read-only operations from write operations
+3. Use different service accounts for different environments (dev, staging, prod)
+4. Allow certain CI/CD pipelines to only read but not modify infrastructure
+
+This pattern helps implement security best practices by ensuring each component has only the permissions it needs.

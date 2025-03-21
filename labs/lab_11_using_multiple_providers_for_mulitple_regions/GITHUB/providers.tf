@@ -3,19 +3,7 @@ terraform {
   required_providers {
     github = {
       source  = "integrations/github"
-      version = "~> 6.0"
+      version = "~> 5.0"
     }
   }
-}
-
-# Primary owner provider
-provider "github" {
-  owner = var.primary_owner
-  alias = "primary"
-}
-
-# Secondary owner provider
-provider "github" {
-  owner = var.secondary_owner
-  alias = "secondary"
 }
