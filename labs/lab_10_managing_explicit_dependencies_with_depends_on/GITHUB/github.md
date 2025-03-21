@@ -122,11 +122,6 @@ output "repository_url" {
   value       = github_repository.main.html_url
 }
 
-output "team_name" {
-  description = "Name of the developers team"
-  value       = github_team.developers.name
-}
-
 output "files_created" {
   description = "Files created in the repository"
   value = [
