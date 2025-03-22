@@ -140,17 +140,13 @@ Let's examine the key aspects of using modules from the Terraform Registry:
 
 ### Module Sources
 The `source` attribute specifies where to find the module:
+```hcl
+source = "mineiros-io/repository/github"
 ```
-source = "HappyPathway/repo/github"
-```
-This format refers to modules in the public Terraform Registry, while:
-```
-source = "git@github.com:masterborn/terraform-github-default-branch-protection.git?ref=v1.1.0"
-```
-Refers to a module hosted in a Git repository with a specific tag/version.
+This format refers to modules in the public Terraform Registry.
 
 ### Module Versioning
-The `?ref=v1.1.0` portion pins the module to a specific version when using Git sources.
+The `version = "1.1.0"` portion pins the module to a specific version when using Git sources.
 This ensures consistent behavior even if the module is updated.
 
 ### Module Inputs
