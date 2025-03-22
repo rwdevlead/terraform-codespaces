@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use a few essential Terraform built-in functions: `min`, `max`, `join`, and `toset`. These functions help you manipulate values and create more flexible infrastructure configurations. The lab uses GitHub free resources to ensure no costs are incurred.
 
+[![Lab 13](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -26,55 +28,9 @@ Note: GitHub credentials are required for this lab.
 
 ## Initial Configuration Files
 
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = ">= 6.0"
-    }
-  }
-}
-
-provider "github" {
-  owner = var.organization
-}
-```
-
-### variables.tf
-```hcl
-variable "organization" {
-  description = "GitHub organization name"
-  type        = string
-  default     = "your-organization"  # Replace with your org name or username
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "repository_names" {
-  description = "List of repository name suffixes"
-  type        = list(string)
-  default     = ["api", "web", "docs", "utils", "cli"]
-}
-
-variable "team_members" {
-  description = "List of team members with duplicates"
-  type        = list(string)
-  default     = ["user1", "user2", "user3", "user1", "user4"]
-}
-
-variable "topics" {
-  description = "List of repository topics"
-  type        = list(string)
-  default     = ["terraform", "infrastructure", "devops", "automation"]
-}
-```
+ - `main.tf`
+ - `providers.tf`
+ - `variables.tf`
 
 ## Lab Steps
 
@@ -103,18 +59,18 @@ resource "github_repository" "main" {
 }
 ```
 
-### 3. Use Min Function for Repository Count
+### 3. View details of the `Min` Function for Repository Count
 
-The code above already uses the min function to limit the number of repositories to create:
+The code above already uses the `min` function to limit the number of repositories to create:
 ```hcl
 count = min(3, length(var.repository_names))
 ```
 
-This ensures that no more than 3 repositories are created, even if the variable contains more names.
+This ensures that no more than `3` repositories are created, even if the variable contains more names.
 
 ### 4. Use Toset Function to Remove Duplicates
 
-Create a team with unique members:
+Create a tearepo for each unique members by converting the `var.team_members` **list** to a **set**:
 
 ```hcl
 # Use toset function to remove duplicates from team members list
@@ -122,11 +78,13 @@ locals {
   unique_members = toset(var.team_members)
 }
 
-# Create a team
-resource "github_team" "example" {
-  name        = join("-", [var.environment, "team"])
-  description = "Team with ${length(local.unique_members)} unique members"
-  privacy     = "closed"
+resource "github_repository" "user_repo" {
+  for_each = local.unique_members
+
+  name        = join("-", [var.environment, each.value])
+  description = "Repo for ${each.value} to store code"
+  visibility  = "public"
+  auto_init   = true
 }
 ```
 
@@ -175,9 +133,11 @@ output "unique_team_members" {
   value       = local.unique_members
 }
 
-output "team_name" {
-  description = "Team name (created with join function)"
-  value       = github_team.example.name
+output "user_repo_urls" {
+  description = "A map of each user's repo URL"
+  value = {
+    for username, repo in github_repository.user_repo : username => repo.html_url
+  }
 }
 ```
 
