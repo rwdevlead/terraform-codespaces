@@ -8,7 +8,4 @@ terraform {
   }
 }
 
-provider "github" {
-  owner = var.github_owner
-  # The token is automatically read from the GITHUB_TOKEN environment variable
-}
+provider "github" {}
