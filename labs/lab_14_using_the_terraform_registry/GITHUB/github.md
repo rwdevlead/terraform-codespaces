@@ -151,20 +151,20 @@ This ensures consistent behavior even if the module is updated.
 
 ### Module Inputs
 Each module accepts input variables that control its behavior:
-```
+```hcl
 name = "${var.environment}-app"
 ```
 
 ### Module Outputs
 Modules provide outputs that can be used by other resources:
-```
+```hcl
 repository_name = module.repository.repository_name
 ```
 Here, the repository name output from the first module is used as an input for the second module.
 
 ### Multiple Module Instances
 The same module can be called multiple times with different parameters:
-```
+```hcl
 module "repository" {
   name = "${var.environment}-app"
   ...
@@ -178,7 +178,7 @@ module "repository_xyz" {
 
 ### Using For_Each with Modules
 Modules can be instantiated multiple times using for_each:
-```
+```hcl
 module "multiple_repositories" {
   for_each = var.additional_repositories
   name = "${var.environment}-${each.key}"
