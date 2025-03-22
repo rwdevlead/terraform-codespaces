@@ -3,6 +3,8 @@
 ## Overview
 This lab demonstrates how to use Terraform's `lifecycle` meta-argument to control the creation, update, and deletion behavior of GitHub resources. You'll learn how to prevent resource destruction and ignore specific changes.
 
+[![Lab 12](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -28,64 +30,9 @@ Note: GitHub credentials are required for this lab.
 
 The lab directory contains the following initial files:
 
-### variables.tf
-```hcl
-variable "github_owner" {
-  description = "GitHub owner (organization or username)"
-  type        = string
-  default     = "your-github-username"  # Replace with your GitHub username or organization
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "repo_visibility" {
-  description = "Repository visibility"
-  type        = string
-  default     = "private"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "github" {
-  owner = var.github_owner
-}
-```
-
-### main.tf
-```hcl
-# Standard repository without lifecycle configuration
-resource "github_repository" "standard" {
-  name        = "standard-${var.environment}-repo"
-  description = "Standard repository for ${var.environment} environment"
-  visibility  = var.repo_visibility
-  auto_init   = true
-
-  topics = ["terraform", "lifecycle-demo"]
-}
-
-# Issue label without lifecycle configuration
-resource "github_issue_label" "standard" {
-  repository  = github_repository.standard.name
-  name        = "standard"
-  color       = "FF0000"
-  description = "Standard issue label"
-}
-```
+  - `main.tf`
+  - `variables.tf`
+  - `providers.tf`
 
 ## Lab Steps
 
@@ -103,7 +50,7 @@ terraform init
 
 ### 2. Examine the Initial Configuration
 
-Notice the resources in main.tf do not have any lifecycle configuration.
+Notice the resources in `main.tf` do not have any lifecycle configuration.
 
 ### 3. Run an Initial Apply
 
@@ -113,9 +60,9 @@ terraform plan
 terraform apply
 ```
 
-### 4. Add prevent_destroy Lifecycle Configuration
+### 4. Add `prevent_destroy` Lifecycle Configuration
 
-Add a new repository with the `prevent_destroy` lifecycle configuration:
+Add a new `github_repository` resource with the `prevent_destroy` lifecycle configuration:
 
 ```hcl
 # Repository with prevent_destroy
@@ -126,11 +73,15 @@ resource "github_repository" "protected" {
   auto_init   = true
 
   topics = ["terraform", "lifecycle-demo", "protected"]
+}
+```
 
+Add the `lifecycle` configuration to the `github_repository` resource you just added below the `topics` argument:
+
+```hcl
   lifecycle {
     prevent_destroy = true
   }
-}
 ```
 
 ### 5. Apply the Changes
@@ -142,49 +93,49 @@ terraform apply
 
 ### 6. Try to Destroy the Protected Repository
 
-Modify main.tf to comment out or remove the protected repository resource:
-
-```hcl
-# Repository with prevent_destroy
-# resource "github_repository" "protected" {
-#   name        = "protected-${var.environment}-repo"
-#   description = "Protected repository for ${var.environment} environment"
-#   visibility  = var.repo_visibility
-#   auto_init   = true
-#
-#   topics = ["terraform", "lifecycle-demo", "protected"]
-#
-#   lifecycle {
-#     prevent_destroy = true
-#   }
-# }
-```
-
-Apply the change and observe the error:
+Using a targeted approach, destroy the `standard` repository that does NOT include a `lifecycle` argument:
 ```bash
-terraform apply
+terraform destroy -target="github_repository.standard" -auto-approve
 ```
 
-Terraform should prevent you from destroying the protected repository.
+> Terraform should destroy the repository immediately without issue.
 
-### 7. Restore the Protected Repository Resource
+Recreate the standard repository by running a `terraform apply` again:
+```bash
+terraform apply -auto-approve
+```
 
-Uncomment or restore the protected repository resource in main.tf.
+Using a targeted approach, destroy the `protected` repository that includes a `lifecycle` argument:
+```bash
+terraform destroy -target="github_repository.protected" -auto-approve
+```
 
-### 8. Add ignore_changes Lifecycle Configuration
+You should get an error stating that the repository cannot be destroyed due to the lifecycle configuration:
+```bash
+│ Error: Instance cannot be destroyed
+│ 
+│   on main.tf line 20:
+│   20: resource "github_repository" "protected" {
+│ 
+│ Resource github_repository.protected has lifecycle.prevent_destroy set, but the plan calls for this resource to be destroyed. To avoid this error and continue with the plan, either disable lifecycle.prevent_destroy
+│ or reduce the scope of the plan using the -target option.
+```
 
-Add a team with the `ignore_changes` lifecycle configuration to ignore specific attributes:
+### 7. Add `ignore_changes` Lifecycle Configuration
+
+Add an issue with the `ignore_changes` lifecycle configuration to ignore specific attributes:
 
 ```hcl
-# Team with ignore_changes
-resource "github_team" "updates" {
-  name        = "updates-${var.environment}"
-  description = "Team with lifecycle updates configuration"
-  privacy     = "closed"
+# Issue with ignore_changes
+resource "github_issue_label" "ignored" {
+  repository  = github_repository.protected.name
+  name        = "standard"
+  color       = "000000"
+  description = "Protected issue label"
 
   lifecycle {
     ignore_changes = [
-      description
+      color
     ]
   }
 }
@@ -197,18 +148,18 @@ terraform apply
 
 ### 10. Update the Team Description
 
-Let's simulate changing the description outside of Terraform by updating it in our Terraform configuration:
+Let's simulate changing the issue color outside of Terraform by updating it in our Terraform configuration:
 
 ```hcl
-# Team with ignore_changes
-resource "github_team" "updates" {
-  name        = "updates-${var.environment}"
-  description = "This description has been changed but will be ignored"
-  privacy     = "closed"
+resource "github_issue_label" "ignored" {
+  repository  = github_repository.protected.name
+  name        = "standard"
+  color       = "FF0000"                     # <-- change the color here from 000000 to FF00000
+  description = "Protected issue label"
 
   lifecycle {
     ignore_changes = [
-      description
+      color
     ]
   }
 }
@@ -220,15 +171,15 @@ terraform plan
 terraform apply
 ```
 
-Notice that Terraform doesn't try to update the description since we've configured it to ignore changes to this attribute.
+> Notice that Terraform doesn't try to update the `Color` since we've configured it to ignore changes to this attribute.
 
-### 12. Add Repository Branch with ignore_changes for Branch Protection
+### 12. Add Repository Branch with `ignore_changes` for Branch Protection
 
 Add a repository with a `default_branch` that shouldn't be changed if it's modified outside of Terraform:
 
 ```hcl
 # Repository with branch ignore_changes
-resource "github_repository" "branch_ignore" {
+resource "github_repository" "visibility_ignore" {
   name        = "branch-${var.environment}-repo"
   description = "Repository with branch ignore_changes configuration"
   visibility  = var.repo_visibility
@@ -237,7 +188,7 @@ resource "github_repository" "branch_ignore" {
   # If branch was changed outside of Terraform, don't try to change it back
   lifecycle {
     ignore_changes = [
-      default_branch
+      visibility
     ]
   }
 }
@@ -263,11 +214,6 @@ output "protected_repository_url" {
   value       = github_repository.protected.html_url
 }
 
-output "team_name" {
-  description = "Name of the team with ignore_changes"
-  value       = github_team.updates.name
-}
-
 output "branch_ignore_repository_url" {
   description = "URL of the repository with branch ignore_changes"
   value       = github_repository.branch_ignore.html_url
@@ -277,7 +223,7 @@ output "lifecycle_examples" {
   description = "Examples of lifecycle configurations used"
   value = {
     "prevent_destroy" = "Repository protected from accidental deletion"
-    "ignore_changes" = "Team description and repository branch changes are ignored"
+    "ignore_changes" = "Issue color and repository branch changes are ignored"
   }
 }
 ```
@@ -307,7 +253,7 @@ resource "github_repository" "protected" {
 
 Then clean up all resources:
 ```bash
-terraform apply  # Apply the removal of prevent_destroy first
+terraform apply -auto-approve # Apply the removal of prevent_destroy first
 terraform destroy
 ```
 
