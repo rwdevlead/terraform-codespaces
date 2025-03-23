@@ -72,7 +72,7 @@ resource "azurerm_virtual_network" "main" {
     Environment = "Lab"
     Managed_By = "Terraform"
   }
-  }
+ }
 ```
 
 ### 4. Format and Validate
@@ -135,10 +135,10 @@ resource "azurerm_virtual_network" "main" {
   location            = azurerm_resource_group.main.location
   address_space       = ["192.168.0.0/16"]  # <-- change IP Address
 
+  tags = {
     Name        = "terraform-course"
     Environment = "Lab"
-    Managed_By = "Terraform"
-  }
+    Managed_By  = "Terraform"
   }
 }
 ```
