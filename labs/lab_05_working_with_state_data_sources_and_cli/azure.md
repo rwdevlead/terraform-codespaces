@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to work with Terraform state, use data sources to query Azure information, and explore additional Terraform CLI commands. You'll create a development environment configuration, learn how to inspect and manage state, and properly clean up all resources. The lab introduces the concept of using data sources to make your configurations more dynamic and environment-aware.
 
+[![Lab 05](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -107,7 +109,7 @@ Configure the provider in `providers.tf`:
 
 ```hcl
 terraform {
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.10.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
