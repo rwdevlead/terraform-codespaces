@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will examine an existing Terraform configuration with hardcoded values and refactor it to be more dynamic and reusable. You'll implement variables, data sources, and string interpolation to create a more flexible infrastructure definition. The lab uses Azure free-tier eligible resources to ensure no costs are incurred.
 
+[![Lab 06](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -27,59 +29,9 @@ Note: Azure credentials are required for this lab.
 
 The lab directory contains the following files with hardcoded values that we'll refactor:
 
-### main.tf
-```hcl
-# Static configuration with hardcoded values
-resource "azurerm_resource_group" "production" {
-  name     = "production-resources"
-  location = "eastus"
-
-  tags = {
-    Environment = "production"
-    Project     = "static-infrastructure"
-    ManagedBy   = "manual-deployment"
-    Region      = "eastus"
-  }
-}
-
-resource "azurerm_virtual_network" "production" {
-  name                = "production-network"
-  resource_group_name = azurerm_resource_group.production.name
-  location            = azurerm_resource_group.production.location
-  address_space       = ["10.0.0.0/16"]
-
-  tags = {
-    Environment = "production"
-    Project     = "static-infrastructure"
-    ManagedBy   = "manual-deployment"
-    Region      = "eastus"
-  }
-}
-
-resource "azurerm_subnet" "private" {
-  name                 = "production-subnet"
-  resource_group_name  = azurerm_resource_group.production.name
-  virtual_network_name = azurerm_virtual_network.production.name
-  address_prefixes     = ["10.0.1.0/24"]
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-```
+ - `main.tf`
+ - `providers.tf`
+ - `variables.tf`
 
 Examine these files and notice:
 - Hardcoded resource group name and location
@@ -107,7 +59,7 @@ export ARM_SUBSCRIPTION_ID=12345abdce
 
 ### 2. Create Variables File
 
-Create `variables.tf` to define variables that will replace hardcoded values:
+Add the following to the `variables.tf` file to define variables that will replace hardcoded values:
 
 ```hcl
 variable "environment" {
@@ -158,40 +110,40 @@ data "azurerm_subscription" "current" {}
 Replace the existing resources in `main.tf` with this dynamic configuration:
 
 ```hcl
-resource "azurerm_resource_group" "dynamic" {
-  name     = "${var.environment}-resources"
-  location = var.location
+resource "azurerm_resource_group" "production" {
+  name     = "${var.environment}-resources"   # <-- update value here
+  location = var.location                     # <-- update value here
 
   tags = {
-    Environment = var.environment
-    Project     = var.project_name
-    ManagedBy   = "terraform"
-    Region      = var.location
-    Subscription = data.azurerm_subscription.current.display_name
-    TenantId    = data.azurerm_client_config.current.tenant_id
+    Environment = var.environment       # <-- update value here
+    Project     = var.project_name      # <-- update value here
+    ManagedBy   = "terraform"           # <-- update value here
+    Region      = var.location          # <-- update value here
+    Subscription = data.azurerm_subscription.current.display_name      # <-- add new tag here
+    TenantId    = data.azurerm_client_config.current.tenant_id         # <-- add new tag here
   }
 }
 
-resource "azurerm_virtual_network" "dynamic" {
-  name                = "${var.environment}-network"
-  resource_group_name = azurerm_resource_group.dynamic.name
-  location            = azurerm_resource_group.dynamic.location
-  address_space       = var.vnet_address_space
+resource "azurerm_virtual_network" "production" {
+  name                = "${var.environment}-network"                 # <-- update value here
+  resource_group_name = azurerm_resource_group.production.name
+  location            = azurerm_resource_group.production.location
+  address_space       = var.vnet_address_space                       # <-- update value here
 
   tags = {
-    Environment  = var.environment
-    Project      = var.project_name
+    Environment  = var.environment                                    # <-- update value here
+    Project      = var.project_name                                   # <-- update value here
     ManagedBy    = "terraform"
-    Region       = var.location
-    Subscription = data.azurerm_subscription.current.display_name
+    Region       = var.location                                       # <-- update value here
+    Subscription = data.azurerm_subscription.current.display_name     # <-- update value here
   }
 }
 
 resource "azurerm_subnet" "dynamic" {
-  name                 = "${var.environment}-subnet"
-  resource_group_name  = azurerm_resource_group.dynamic.name
-  virtual_network_name = azurerm_virtual_network.dynamic.name
-  address_prefixes     = var.subnet_prefix
+  name                 = "${var.environment}-subnet"                  # <-- update value here
+  resource_group_name  = azurerm_resource_group.production.name
+  virtual_network_name = azurerm_virtual_network.production.name
+  address_prefixes     = var.subnet_prefix                            # <-- update value here
 }
 ```
 
@@ -202,12 +154,12 @@ Create `outputs.tf` to display resource information:
 ```hcl
 output "resource_group_id" {
   description = "ID of the created Resource Group"
-  value       = azurerm_resource_group.dynamic.id
+  value       = azurerm_resource_group.production.id
 }
 
 output "vnet_id" {
   description = "ID of the created Virtual Network"
-  value       = azurerm_virtual_network.dynamic.id
+  value       = azurerm_virtual_network.production.id
 }
 
 output "subscription_info" {
@@ -239,6 +191,7 @@ project_name       = "dynamic-infrastructure"
 Initialize and apply the configuration:
 
 ```bash
+terraform fmt
 terraform init
 terraform plan
 terraform apply
@@ -249,24 +202,24 @@ terraform apply
 Create a file called `westus.tfvars` to deploy to a different region:
 
 ```hcl
-environment        = "production"
+environment        = "testing"
 location           = "westus"
 vnet_address_space = ["192.168.0.0/16"]
 subnet_prefix      = ["192.168.1.0/24"]
 project_name       = "dynamic-infrastructure"
 ```
 
-Apply the new configuration:
+Create a new plan using the specific variables file:
 ```bash
 terraform plan -var-file="westus.tfvars"
-terraform apply -var-file="westus.tfvars"
 ```
 
 Notice how:
-- Resources are created in West US region
+- The current resources in `East US` would be destroyed
+- The resources would now be created in `West US` region
 - Different address spaces are used
 - All region-specific tags update automatically
-- The resource names reflect the "production" environment
+- The resource names reflect the "testing" environment
 
 ## Understanding the Changes
 
