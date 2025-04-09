@@ -1,6 +1,6 @@
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "main-resources"
+  name     = "primary-resources"
   location = "eastus"
 
   tags = {
