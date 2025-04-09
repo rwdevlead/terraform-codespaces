@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use Terraform's `locals` blocks to refactor repetitive code, create computed values, and make your configurations more dynamic. You'll take an existing configuration with redundant elements and improve it by centralizing common values and creating more maintainable infrastructure code.
 
+[![Lab 07](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -27,137 +29,9 @@ Note: Azure credentials are required for this lab.
 
 The lab directory contains the following files with repetitive code that we'll refactor:
 
-### main.tf
-```hcl
-# Static configuration with repetitive elements
-resource "azurerm_resource_group" "main" {
-  name     = "production-resources"
-  location = "eastus"
-
-  tags = {
-    Name        = "production-resources"
-    Environment = "production"
-    Project     = "terraform-demo"
-    Owner       = "infrastructure-team"
-    CostCenter  = "cc-1234"
-    Region      = "eastus"
-  }
-}
-
-resource "azurerm_virtual_network" "main" {
-  name                = "production-vnet"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  address_space       = ["10.0.0.0/16"]
-
-  tags = {
-    Name        = "production-vnet"
-    Environment = "production"
-    Project     = "terraform-demo"
-    Owner       = "infrastructure-team"
-    CostCenter  = "cc-1234"
-    Region      = "eastus"
-  }
-}
-
-resource "azurerm_subnet" "web" {
-  name                 = "production-web-subnet"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.0.1.0/24"]
-}
-
-resource "azurerm_subnet" "app" {
-  name                 = "production-app-subnet"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.0.2.0/24"]
-}
-
-resource "azurerm_subnet" "db" {
-  name                 = "production-db-subnet"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.0.3.0/24"]
-}
-
-resource "azurerm_network_security_group" "web" {
-  name                = "production-web-nsg"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "allow-http"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "allow-https"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  tags = {
-    Name        = "production-web-nsg"
-    Environment = "production"
-    Project     = "terraform-demo"
-    Owner       = "infrastructure-team"
-    CostCenter  = "cc-1234"
-    Region      = "eastus"
-  }
-}
-```
-
-### variables.tf
-```hcl
-variable "location" {
-  description = "Azure region to deploy resources"
-  type        = string
-  default     = "eastus"
-}
-
-variable "environment" {
-  description = "Environment name for resource naming and tagging"
-  type        = string
-  default     = "production"
-}
-
-variable "vnet_address_space" {
-  description = "Address space for Virtual Network"
-  type        = list(string)
-  default     = ["10.0.0.0/16"]
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Repeated tag values across multiple resources
@@ -173,11 +47,6 @@ Make sure you're authenticated with Azure:
 
 ```bash
 az login
-```
-
-If you're in a codespace, you might need to use device code authentication:
-```bash
-az login --use-device-code
 ```
 
 ### 2. Add Data Sources
@@ -197,12 +66,12 @@ Add a locals block at the top of `main.tf` (after the data source):
 locals {
   # Common tags for all resources
   tags = {
-    Environment = var.environment
-    Project     = "terraform-demo"
-    Owner       = "infrastructure-team"
-    CostCenter  = "cc-1234"
-    Region      = var.location
-    ManagedBy   = "terraform"
+    Environment  = var.environment
+    Project      = "terraform-demo"
+    Owner        = "infrastructure-team"
+    CostCenter   = "cc-1234"
+    Region       = var.location
+    ManagedBy    = "terraform"
     Subscription = data.azurerm_subscription.current.display_name
   }
   
@@ -221,13 +90,13 @@ resource "azurerm_resource_group" "main" {
   location = var.location
 
   tags = {
-    Name        = "${local.name_prefix}resources"
-    Environment = local.tags.Environment
-    Project     = local.tags.Project
-    Owner       = local.tags.Owner
-    CostCenter  = local.tags.CostCenter
-    Region      = local.tags.Region
-    ManagedBy   = local.tags.ManagedBy
+    Name         = "${local.name_prefix}resources"
+    Environment  = local.tags.Environment
+    Project      = local.tags.Project
+    Owner        = local.tags.Owner
+    CostCenter   = local.tags.CostCenter
+    Region       = local.tags.Region
+    ManagedBy    = local.tags.ManagedBy
     Subscription = local.tags.Subscription
   }
 }
@@ -354,8 +223,8 @@ output "nsg_id" {
 Initialize and apply the initial configuration:
 
 ```bash
-terraform init
 terraform fmt
+terraform init
 terraform validate
 terraform plan
 terraform apply
@@ -370,7 +239,7 @@ Review the created resources in the Azure Portal:
 
 Now, let's demonstrate the power of centralized configuration by updating our locals block:
 
-1. Modify the locals block in `main.tf` to update some values:
+1. Modify the `locals` block in `main.tf` to update some values:
 
 ```hcl
 locals {
@@ -395,7 +264,6 @@ locals {
 ```hcl
 environment = "dev"
 location    = "eastus"
-vnet_address_space = ["172.16.0.0/16"]
 ```
 
 3. Apply the changes and observe the results:
