@@ -1,9 +1,3 @@
-variable "location" {
-  description = "Azure region to deploy resources"
-  type        = string
-  default     = "eastus"
-}
-
 variable "vnet_cidr_blocks" {
   description = "CIDR blocks for virtual networks"
   type        = list(string)

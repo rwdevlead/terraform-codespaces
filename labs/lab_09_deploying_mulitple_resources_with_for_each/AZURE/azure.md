@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to use Terraform's `for_each` meta-argument to create and manage multiple resources efficiently. You'll discover how `for_each` differs from `count` and when to use each approach. The lab uses Azure free-tier resources to ensure no costs are incurred.
 
+[![Lab 09](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -28,116 +30,9 @@ Note: Azure credentials are required for this lab.
 
 The lab directory contains the following files with resources created using `count` that we'll refactor to use `for_each`:
 
-### main.tf
-```hcl
-# Resource Group
-resource "azurerm_resource_group" "main" {
-  name     = "main-resources"
-  location = "eastus"
-
-  tags = {
-    Environment = "Development"
-  }
-}
-
-# Virtual Networks created with count
-resource "azurerm_virtual_network" "vnet_count" {
-  count               = 3
-  name                = "vnet-count-${count.index + 1}"
-  address_space       = ["10.${count.index}.0.0/16"]
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = {
-    Environment = "Development"
-    Network     = "Network-${count.index + 1}"
-  }
-}
-
-# Subnets created with count
-resource "azurerm_subnet" "subnet_count" {
-  count                = 3
-  name                 = "subnet-count-${count.index + 1}"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.vnet_count[0].name
-  address_prefixes     = ["10.0.${count.index + 1}.0/24"]
-}
-
-# Network Security Groups created with count
-resource "azurerm_network_security_group" "nsg_count" {
-  count               = 3
-  name                = "nsg-count-${count.index + 1}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "rule-${count.index + 1}"
-    priority                   = 100 + count.index
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = tostring(80 + count.index * 1000)
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  tags = {
-    Environment = "Development"
-    Type        = "NSG-${count.index + 1}"
-  }
-}
-```
-
-### variables.tf
-```hcl
-variable "location" {
-  description = "Azure region to deploy resources"
-  type        = string
-  default     = "eastus"
-}
-
-variable "vnet_cidr_blocks" {
-  description = "CIDR blocks for virtual networks"
-  type        = list(string)
-  default     = ["10.0.0.0/16", "10.1.0.0/16", "10.2.0.0/16"]
-}
-
-variable "subnet_prefixes" {
-  description = "Address prefixes for subnets"
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-}
-
-variable "nsg_names" {
-  description = "Names for network security groups"
-  type        = list(string)
-  default     = ["web", "app", "db"]
-}
-
-variable "nsg_ports" {
-  description = "Ports for network security groups"
-  type        = list(number)
-  default     = [80, 8080, 3306]
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 4.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Virtual network creation using count and list indexing
@@ -155,12 +50,7 @@ Make sure you're authenticated with Azure:
 az login
 ```
 
-If you're in a codespace, you might need to use device code authentication:
-```bash
-az login --use-device-code
-```
-
-### 2. Update Variables for For_Each
+### 2. Update Variables that will be used with our `for_each`
 
 Modify `variables.tf` to include map variables for use with for_each:
 
@@ -199,7 +89,7 @@ variable "subnet_config" {
   }
 }
 
-variable "nsg_ports" {
+variable "nsg_ports_map" {
   description = "Map of NSG ports"
   type        = map(number)
   default = {
@@ -213,7 +103,7 @@ variable "nsg_ports" {
 
 ### 3. Keep Count-Based Resources
 
-Leave the Resource Group and count-based resources in place for comparison:
+Leave the Azure Resource Group and count-based resources in place for comparison:
 
 ```hcl
 # Resource Group
@@ -266,6 +156,7 @@ resource "azurerm_virtual_network" "vnet_foreach" {
 Initialize and apply the configuration:
 
 ```bash
+terraform fmt
 terraform init
 terraform plan
 terraform apply
@@ -328,6 +219,26 @@ resource "azurerm_network_security_group" "nsg_foreach" {
 }
 ```
 
+Try to apply the configuration:
+
+```bash
+terraform plan
+terraform apply
+```
+
+> Tricked you! Notice that the Network Security Groups block is using the `var.nsg_ports` variable, which is our _original_ variable that is a `list`, not a `map`. Remember that **for_each** doesn't work with lists, so we need to use our newer variable of `var.nsg_ports_map`.
+
+Change the resource block to use `var.nsg_ports_map` instead:
+
+```hcl
+# Network Security Groups created with for_each
+resource "azurerm_network_security_group" "nsg_foreach" {
+  for_each            = var.nsg_ports_map                      # <-- change it here
+  name                = "nsg-${each.key}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  ...
+```
 Apply the configuration:
 
 ```bash
@@ -337,7 +248,7 @@ terraform apply
 
 ### 8. Create Simple Route Tables with For_Each
 
-Create a simple map for route tables:
+Create a simple map for route tables in the `variables.tf` file:
 
 ```hcl
 variable "route_tables" {
@@ -351,7 +262,7 @@ variable "route_tables" {
 }
 ```
 
-Add route table resources using for_each:
+Add route table resources using `for_each` in the `main.tf` file:
 
 ```hcl
 # Route tables created with for_each
@@ -377,7 +288,7 @@ terraform apply
 
 ### 9. Create Outputs for For_Each Resources
 
-Create an `outputs.tf` file to reference for_each-based resources:
+Create an `outputs.tf` file to reference `for_each`-based resources:
 
 ```hcl
 output "vnet_count_ids" {
@@ -414,9 +325,9 @@ terraform apply
 
 ### 10. Experiment by Modifying Resources
 
-Let's demonstrate the advantage of for_each when removing or renaming resources:
+Let's demonstrate the advantage of `for_each` when removing or renaming resources:
 
-1. Modify the vnet_config variable to remove one virtual network:
+1. Modify the `vnet_config` variable to remove **one** virtual network:
 
 ```hcl
 variable "vnet_config" {
@@ -430,7 +341,7 @@ variable "vnet_config" {
 }
 ```
 
-2. Also modify the vnet_cidr_blocks list to remove an element:
+2. Also modify the `vnet_cidr_blocks` list to remove an element:
 
 ```hcl
 variable "vnet_cidr_blocks" {
@@ -447,15 +358,15 @@ terraform plan
 ```
 
 Notice how:
-- With count, removing the middle element shifts all indexes, potentially recreating resources
-- With for_each, only the specific "staging" virtual network is removed, leaving others untouched
+- With `count`, removing the middle element shifts all indexes, potentially recreating resources
+- With `for_each`, only the specific "staging" virtual network is removed, leaving others untouched
 
 ### 11. Add a New Resource to Existing Map
 
-Add a new entry to the nsg_ports map:
+Add a new entry to the `nsg_ports_map` variable:
 
 ```hcl
-variable "nsg_ports" {
+variable "nsg_ports_map" {
   description = "Map of NSG ports"
   type        = map(number)
   default = {
