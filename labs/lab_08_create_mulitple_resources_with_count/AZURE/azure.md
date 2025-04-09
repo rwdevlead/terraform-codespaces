@@ -25,168 +25,11 @@ Note: Azure credentials are required for this lab.
 
 ## Existing Configuration Files
 
-The lab directory contains the following files with repetitive resource creation that we'll refactor using count:
+The lab directory contains the following files with repetitive resource creation that we'll refactor using `count`:
 
-### main.tf
-```hcl
-# Resource Group
-resource "azurerm_resource_group" "main" {
-  name     = "main-resources"
-  location = "eastus"
-
-  tags = {
-    Environment = "Development"
-  }
-}
-
-# Individual Virtual Networks
-resource "azurerm_virtual_network" "vnet1" {
-  name                = "vnet-1"
-  address_space       = ["10.1.0.0/16"]
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = {
-    Environment = "Development"
-    Network     = "VNet1"
-  }
-}
-
-resource "azurerm_virtual_network" "vnet2" {
-  name                = "vnet-2"
-  address_space       = ["10.2.0.0/16"]
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = {
-    Environment = "Development"
-    Network     = "VNet2"
-  }
-}
-
-resource "azurerm_virtual_network" "vnet3" {
-  name                = "vnet-3"
-  address_space       = ["10.3.0.0/16"]
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = {
-    Environment = "Development"
-    Network     = "VNet3"
-  }
-}
-
-# Individual Subnets
-resource "azurerm_subnet" "subnet1" {
-  name                 = "subnet-1"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.vnet1.name
-  address_prefixes     = ["10.1.1.0/24"]
-}
-
-resource "azurerm_subnet" "subnet2" {
-  name                 = "subnet-2"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.vnet1.name
-  address_prefixes     = ["10.1.2.0/24"]
-}
-
-# Individual Network Security Groups
-resource "azurerm_network_security_group" "web" {
-  name                = "web-nsg"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "allow-http"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  tags = {
-    Environment = "Development"
-    Role        = "Web"
-  }
-}
-
-resource "azurerm_network_security_group" "app" {
-  name                = "app-nsg"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "allow-app"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "8080"
-    source_address_prefix      = "10.1.0.0/16"
-    destination_address_prefix = "*"
-  }
-
-  tags = {
-    Environment = "Development"
-    Role        = "App"
-  }
-}
-
-resource "azurerm_network_security_group" "db" {
-  name                = "db-nsg"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "allow-sql"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "1433"
-    source_address_prefix      = "10.1.0.0/16"
-    destination_address_prefix = "*"
-  }
-
-  tags = {
-    Environment = "Development"
-    Role        = "DB"
-  }
-}
-```
-
-### variables.tf
-```hcl
-variable "location" {
-  description = "Azure region to deploy resources"
-  type        = string
-  default     = "eastus"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-```
+ - `main.tf`
+ - `variables.tf`
+ - `providers.tf`
 
 Examine these files and notice:
 - Individual virtual network resources with similar configuration
@@ -204,22 +47,11 @@ Make sure you're authenticated with Azure:
 az login
 ```
 
-If you're in a codespace, you might need to use device code authentication:
-```bash
-az login --use-device-code
-```
-
 ### 2. Update Variables for Count
 
-Modify `variables.tf` to include variables that will work with count:
+Modify `variables.tf` to include variables that will work with `count`:
 
 ```hcl
-variable "location" {
-  description = "Azure region to deploy resources"
-  type        = string
-  default     = "eastus"
-}
-
 variable "vnet_count" {
   description = "Number of virtual networks to create"
   type        = number
@@ -275,9 +107,9 @@ variable "nsg_configs" {
 }
 ```
 
-### 3. Refactor Virtual Networks Using Count
+### 3. Refactor Virtual Networks and Subnets Using `count`
 
-Replace the individual virtual network resources with a single count-based resource in `main.tf`:
+Replace the individual virtual network resources with a single `count`-based resource in `main.tf`:
 
 ```hcl
 # Resource Group remains the same
@@ -292,32 +124,40 @@ resource "azurerm_resource_group" "main" {
 
 # Refactored Virtual Networks using count
 resource "azurerm_virtual_network" "vnet" {
-  count               = var.vnet_count
-  name                = "vnet-${count.index + 1}"
-  address_space       = [var.vnet_address_spaces[count.index]]
+  count               = var.vnet_count                           # <-- add count meta-argument here
+  name                = "vnet-${count.index + 1}"                # <-- use count.index for dynamic names
+  address_space       = [var.vnet_address_spaces[count.index]]   # <-- use count.index for dynamic address space
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
   tags = {
     Environment = "Development"
-    Network     = "VNet${count.index + 1}"
+    Network     = "VNet${count.index + 1}"                       # <-- use count.index for tag
   }
 }
 ```
 
-### 4. Apply and Test VNet Count
+Next, replace the individual subnet resources with a `count`-based approach - this is required since the original `azuremrm-subnet` configurations referenced the original individual `vnet` resource blocks (which have now been changed).
 
-Initialize and apply the configuration:
+```hcl
+# Refactored Subnets using count
+resource "azurerm_subnet" "subnet" {
+  count                = var.subnet_count
+  name                 = "subnet-${count.index + 1}"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.vnet[0].name
+  address_prefixes     = [var.subnet_address_prefixes[count.index]]
+}
+```
+
+Apply the changes and observe the results - notice how Terraform creates **3** x vNets because the variable `vnet_count` = `3` and then creates **2** subnets per vnet because `subnet_count` = `2`
 
 ```bash
-terraform init
 terraform plan
 terraform apply
 ```
 
-Verify that three virtual networks are created with the correct address spaces.
-
-### 5. Adjust VNet Count
+### 4. Adjust VNet Count
 
 Modify the vnet_count variable in `terraform.tfvars` (create this file) to test different VNet counts:
 
@@ -334,31 +174,9 @@ terraform apply
 
 Notice how Terraform plans to destroy one virtual network, maintaining only the number specified in the count.
 
-### 6. Refactor Subnets Using Count
+### 5. Refactor Network Security Groups Using Count
 
-Next, replace the individual subnet resources with a count-based approach:
-
-```hcl
-# Refactored Subnets using count
-resource "azurerm_subnet" "subnet" {
-  count                = var.subnet_count
-  name                 = "subnet-${count.index + 1}"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.vnet[0].name
-  address_prefixes     = [var.subnet_address_prefixes[count.index]]
-}
-```
-
-Apply the changes:
-
-```bash
-terraform plan
-terraform apply
-```
-
-### 7. Refactor Network Security Groups Using Count
-
-Replace the individual NSG resources with a count-based approach:
+Replace the individual NSG resources with a count-based approach - this one uses a much more complex variable but it's a good example to show.
 
 ```hcl
 # Refactored Network Security Groups using count
@@ -387,7 +205,7 @@ resource "azurerm_network_security_group" "nsg" {
 }
 ```
 
-### 8. Create Outputs Using Count
+### 6. Create Outputs Using Count
 
 Create an `outputs.tf` file to demonstrate how to reference count-based resources:
 
@@ -418,45 +236,7 @@ output "nsg_ids" {
 }
 ```
 
-### 9. Experiment with Count Values
-
-Let's update our configuration to create different numbers of route tables based on a simple count:
-
-Add this to `variables.tf`:
-```hcl
-variable "route_table_count" {
-  description = "Number of route tables to create"
-  type        = number
-  default     = 2
-}
-```
-
-Add these route tables to `main.tf`:
-```hcl
-# Create multiple route tables
-resource "azurerm_route_table" "example" {
-  count               = var.route_table_count
-  name                = "route-table-${count.index + 1}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = {
-    Name = "route-table-${count.index + 1}"
-  }
-}
-```
-
-Apply the configuration with different route table counts:
-
-```bash
-# Set route_table_count to 1
-terraform apply -var="route_table_count=1"
-
-# Set route_table_count to 3
-terraform apply -var="route_table_count=3"
-```
-
-### 10. Clean Up
+### 7. Clean Up
 
 Remove all created resources:
 
