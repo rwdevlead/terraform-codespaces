@@ -53,7 +53,7 @@ resource "azurerm_network_security_group" "example" {
 
 # Storage Account
 resource "azurerm_storage_account" "example" {
-  name                     = "sa${var.environment}${formatdate("YYMMdd", timestamp())}"
+  name                     = "sa${var.environment}${formatdate("YYMMDD", timestamp())}"
   resource_group_name      = azurerm_resource_group.example.name
   location                 = azurerm_resource_group.example.location
   account_tier             = "Standard"
