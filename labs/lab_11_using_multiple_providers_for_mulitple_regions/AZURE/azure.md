@@ -3,6 +3,8 @@
 ## Overview
 This lab demonstrates how to use multiple provider blocks in Terraform to deploy resources to different Azure regions simultaneously. You'll create resources in two regions using a simple, free configuration.
 
+[![Lab 11](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
@@ -27,108 +29,9 @@ Note: Azure credentials are required for this lab.
 
 The lab directory contains the following initial files:
 
-### variables.tf
-```hcl
-variable "primary_location" {
-  description = "Primary Azure location"
-  type        = string
-  default     = "eastus"
-}
-
-variable "secondary_location" {
-  description = "Secondary Azure location"
-  type        = string
-  default     = "westus"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.0"
-    }
-  }
-}
-
-# Primary region provider
-provider "azurerm" {
-  features {}
-  alias = "primary"
-}
-
-# Secondary region provider
-provider "azurerm" {
-  features {}
-  alias = "secondary"
-}
-```
-
-### main.tf
-```hcl
-# Resource Group in primary region
-resource "azurerm_resource_group" "primary" {
-  provider = azurerm.primary
-  name     = "rg-${var.environment}-primary"
-  location = var.primary_location
-  
-  tags = {
-    Environment = var.environment
-    Region      = var.primary_location
-  }
-}
-
-# Resource Group in secondary region
-resource "azurerm_resource_group" "secondary" {
-  provider = azurerm.secondary
-  name     = "rg-${var.environment}-secondary"
-  location = var.secondary_location
-  
-  tags = {
-    Environment = var.environment
-    Region      = var.secondary_location
-  }
-}
-
-# Storage Account in primary region
-resource "azurerm_storage_account" "primary" {
-  provider                 = azurerm.primary
-  name                     = "sa${var.environment}${formatdate("YYMMdd", timestamp())}"
-  resource_group_name      = azurerm_resource_group.primary.name
-  location                 = azurerm_resource_group.primary.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  
-  tags = {
-    Environment = var.environment
-    Region      = var.primary_location
-  }
-}
-
-# Storage Account in secondary region
-resource "azurerm_storage_account" "secondary" {
-  provider                 = azurerm.secondary
-  name                     = "sa${var.environment}sec${formatdate("YYMMdd", timestamp())}"
-  resource_group_name      = azurerm_resource_group.secondary.name
-  location                 = azurerm_resource_group.secondary.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  
-  tags = {
-    Environment = var.environment
-    Region      = var.secondary_location
-  }
-}
-```
+ - `variables.tf`
+ - `providers.tf`
+ - `main.tf`
 
 ## Lab Steps
 
@@ -141,9 +44,11 @@ terraform init
 
 ### 2. Examine the Provider Configuration
 
-Notice how the provider blocks are configured in providers.tf:
+Notice how the `provider` blocks are configured in `providers.tf`:
 - The primary provider with an alias of "primary"
 - The secondary provider with an alias of "secondary"
+
+> Note to keep this lab simple, I didn't add any specific configurations to the providers. However, normally you could add unique configurations for each, such as a different subscription_id to deploy resources to a different subscription. This was done because Azure provider doesn't support regions within the provider itself like other providers do.
 
 ### 3. Examine the Resource Configuration
 
@@ -161,22 +66,40 @@ terraform apply
 
 ### 5. Add a Container to Each Storage Account
 
-Add the following resources to main.tf:
+Add the following resources to `main.tf`:
 
 ```hcl
 # Storage Container in primary region
 resource "azurerm_storage_container" "primary" {
-  provider              = azurerm.primary
   name                  = "data"
-  storage_account_name  = azurerm_storage_account.primary.name
+  storage_account_id    = azurerm_storage_account.primary.id
   container_access_type = "private"
 }
 
 # Storage Container in secondary region
 resource "azurerm_storage_container" "secondary" {
-  provider              = azurerm.secondary
   name                  = "data"
-  storage_account_name  = azurerm_storage_account.secondary.name
+  storage_account_id    = azurerm_storage_account.secondary.id
+  container_access_type = "private"
+}
+```
+
+Add the `provider` configuration to each of the blocks to specify what provider alias to use for each resource:
+
+```hcl
+# Storage Container in primary region
+resource "azurerm_storage_container" "primary" {
+  provider              = azurerm.primary                      # <--- add this line here
+  name                  = "data"
+  storage_account_id    = azurerm_storage_account.primary.id
+  container_access_type = "private"
+}
+
+# Storage Container in secondary region
+resource "azurerm_storage_container" "secondary" {
+  provider              = azurerm.secondary                    # <--- add this line here
+  name                  = "data"
+  storage_account_id    = azurerm_storage_account.secondary.id
   container_access_type = "private"
 }
 ```

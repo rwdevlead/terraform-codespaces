@@ -8,13 +8,13 @@ terraform {
   }
 }
 
-# Primary region provider
+# Primary provider
 provider "azurerm" {
   features {}
   alias = "primary"
 }
 
-# Secondary region provider
+# Secondary provider
 provider "azurerm" {
   features {}
   alias = "secondary"
