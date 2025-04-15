@@ -27,65 +27,10 @@ Note: Azure credentials are required for this lab.
 
 The lab directory contains the following initial files:
 
-### variables.tf
-```hcl
-variable "location" {
-  description = "Azure location"
-  type        = string
-  default     = "eastus"
-}
+ - `variables.tf`
+ - `providers.tf`
+ - `main.tf`
 
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.10.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-```
-
-### main.tf
-```hcl
-# Resource Group without lifecycle configuration
-resource "azurerm_resource_group" "standard" {
-  name     = "rg-standard-${var.environment}"
-  location = var.location
-
-  tags = {
-    Environment = var.environment
-    Purpose     = "Standard"
-  }
-}
-
-# Storage Account without lifecycle configuration
-resource "azurerm_storage_account" "standard" {
-  name                     = "standardsa${formatdate("YYMMdd", timestamp())}"
-  resource_group_name      = azurerm_resource_group.standard.name
-  location                 = azurerm_resource_group.standard.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-
-  tags = {
-    Environment = var.environment
-    Purpose     = "Standard"
-  }
-}
-```
 
 ## Lab Steps
 
@@ -98,7 +43,7 @@ terraform init
 
 ### 2. Examine the Initial Configuration
 
-Notice the resources in main.tf do not have any lifecycle configuration.
+Notice the resources in `main.tf` do not have any **lifecycle** configuration.
 
 ### 3. Run an Initial Apply
 
@@ -110,7 +55,22 @@ terraform apply
 
 ### 4. Add prevent_destroy Lifecycle Configuration
 
-Add a new resource group with the `prevent_destroy` lifecycle configuration:
+Add a new resource group configuration:
+
+```hcl
+# Resource Group with prevent_destroy
+resource "azurerm_resource_group" "protected" {
+  name     = "rg-protected-${var.environment}"
+  location = var.location
+
+  tags = {
+    Environment = var.environment
+    Purpose     = "Protected"
+  }
+}
+```
+
+Modify the resource block and add the `prevent_destroy` lifecycle configuration:
 
 ```hcl
 # Resource Group with prevent_destroy
@@ -123,12 +83,11 @@ resource "azurerm_resource_group" "protected" {
     Purpose     = "Protected"
   }
 
-  lifecycle {
+  lifecycle {                      # <--- add this lifecycle block here (all 3 lines)
     prevent_destroy = true
   }
 }
 ```
-
 ### 5. Apply the Changes
 
 Apply the configuration to create the protected resource group:
@@ -138,44 +97,28 @@ terraform apply
 
 ### 6. Try to Destroy the Protected Resource Group
 
-Modify main.tf to comment out or remove the protected resource group:
+Run the command `terraform destroy -target="azurerm_resource_group.protected"` to destroy ONLY the new resource group.
 
-```hcl
-# Resource Group with prevent_destroy
-# resource "azurerm_resource_group" "protected" {
-#   name     = "rg-protected-${var.environment}"
-#   location = var.location
-#
-#   tags = {
-#     Environment = var.environment
-#     Purpose     = "Protected"
-#   }
-#
-#   lifecycle {
-#     prevent_destroy = true
-#   }
-# }
-```
+Terraform should prevent you from destroying the protected resource group. You should get a similar error as shown below:
 
-Apply the change and observe the error:
 ```bash
-terraform apply
+Error: Instance cannot be destroyed
+│ 
+│   on main.tf line 27:
+│   27: resource "azurerm_resource_group" "protected" {
+│ 
+│ Resource azurerm_resource_group.protected has lifecycle.prevent_destroy set, but the plan calls for this resource to be destroyed. To avoid this error and continue with the plan, either disable lifecycle.prevent_destroy or reduce the
+│ scope of the plan using the -target option.
 ```
 
-Terraform should prevent you from destroying the protected resource group.
-
-### 7. Restore the Protected Resource Group
-
-Uncomment or restore the protected resource group in main.tf.
-
-### 8. Add create_before_destroy Lifecycle Configuration
+### 7. Use the `create_before_destroy` Lifecycle Configuration
 
 Add a storage account with the `create_before_destroy` lifecycle configuration:
 
 ```hcl
 # Storage Account with create_before_destroy
 resource "azurerm_storage_account" "replacement" {
-  name                     = "replacesa${formatdate("YYMMdd", timestamp())}"
+  name                     = "replacesa${formatdate("YYMMDD", timestamp())}"
   resource_group_name      = azurerm_resource_group.standard.name
   location                 = azurerm_resource_group.standard.location
   account_tier             = "Standard"
@@ -192,12 +135,12 @@ resource "azurerm_storage_account" "replacement" {
 }
 ```
 
-### 9. Apply to Create the Replacement Storage Account
+### 8. Apply to Create the Replacement Storage Account
 ```bash
 terraform apply
 ```
 
-### 10. Add ignore_changes Lifecycle Configuration
+### 9. Add `ignore_changes` Lifecycle Configuration
 
 Add an App Service Plan with the `ignore_changes` lifecycle configuration to ignore specific attributes:
 
@@ -224,12 +167,12 @@ resource "azurerm_service_plan" "updates" {
 }
 ```
 
-### 11. Apply to Create the App Service Plan
+### 10. Apply to Create the App Service Plan
 ```bash
 terraform apply
 ```
 
-### 12. Update the Version Tag
+### 11. Update the Version Tag
 
 Let's simulate changing the Version tag outside of Terraform by updating it in our Terraform configuration:
 
@@ -245,7 +188,7 @@ resource "azurerm_service_plan" "updates" {
   tags = {
     Environment = var.environment
     Purpose     = "Updates"
-    Version     = "2.0.0"  # Changed but will be ignored
+    Version     = "2.0.0"            # <--- Change this even though it will be ignored
   }
 
   lifecycle {
@@ -256,7 +199,7 @@ resource "azurerm_service_plan" "updates" {
 }
 ```
 
-### 13. Apply and Observe Behavior
+### 12. Apply and Observe Behavior
 ```bash
 terraform plan
 terraform apply
@@ -264,52 +207,7 @@ terraform apply
 
 Notice that Terraform doesn't try to update the Version tag since we've configured it to ignore changes to this attribute.
 
-### 14. Create outputs.tf
-
-Create an outputs.tf file:
-
-```hcl
-output "standard_resource_group_name" {
-  description = "Name of the standard resource group"
-  value       = azurerm_resource_group.standard.name
-}
-
-output "protected_resource_group_name" {
-  description = "Name of the protected resource group"
-  value       = azurerm_resource_group.protected.name
-}
-
-output "standard_storage_account_name" {
-  description = "Name of the standard storage account"
-  value       = azurerm_storage_account.standard.name
-}
-
-output "replacement_storage_account_name" {
-  description = "Name of the replacement storage account"
-  value       = azurerm_storage_account.replacement.name
-}
-
-output "app_service_plan_name" {
-  description = "Name of the app service plan"
-  value       = azurerm_service_plan.updates.name
-}
-
-output "lifecycle_examples" {
-  description = "Examples of lifecycle configurations used"
-  value = {
-    "prevent_destroy"      = "Resource group protected from accidental deletion"
-    "create_before_destroy" = "Storage account created before replacing"
-    "ignore_changes"       = "App Service Plan ignores changes to Version tag"
-  }
-}
-```
-
-### 15. Apply to See Outputs
-```bash
-terraform apply
-```
-
-### 16. Clean Up Resources
+### 13. Clean Up Resources
 
 When you're done, remove the `prevent_destroy` lifecycle setting from the protected resource group first:
 

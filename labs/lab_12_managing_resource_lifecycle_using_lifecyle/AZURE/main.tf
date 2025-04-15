@@ -11,7 +11,7 @@ resource "azurerm_resource_group" "standard" {
 
 # Storage Account without lifecycle configuration
 resource "azurerm_storage_account" "standard" {
-  name                     = "standardsa${formatdate("YYMMdd", timestamp())}"
+  name                     = "standardsa${formatdate("YYMMDD", timestamp())}"
   resource_group_name      = azurerm_resource_group.standard.name
   location                 = azurerm_resource_group.standard.location
   account_tier             = "Standard"
