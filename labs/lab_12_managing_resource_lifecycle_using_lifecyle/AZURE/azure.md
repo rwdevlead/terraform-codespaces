@@ -3,6 +3,8 @@
 ## Overview
 This lab demonstrates how to use Terraform's `lifecycle` meta-argument to control the creation, update, and deletion behavior of Azure resources. You'll learn how to prevent resource destruction, create resources before destroying old ones, and ignore specific changes.
 
+[![Lab 12](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
