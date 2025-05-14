@@ -1,33 +1,11 @@
-variable "location" {
-  description = "Azure region to deploy resources"
-  type        = string
-  default     = "eastus"
-}
-
 variable "environment" {
-  description = "Environment name"
+  description = "Environment name (e.g., dev, prod)"
   type        = string
-  default     = "dev"
+  default     = "prod"
 }
 
-variable "address_space" {
-  description = "Address space for the virtual network"
+variable "location" {
+  description = "Azure region for all resources"
   type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-  default     = "main-resources"
-}
-
-variable "storage_accounts" {
-  description = "Map of storage accounts to create"
-  type        = map(string)
-  default = {
-    "logs"      = "Standard_LRS"
-    "artifacts" = "Standard_LRS"
-    "configs"   = "Standard_LRS"
-  }
+  default     = "East US"
 }
