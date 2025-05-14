@@ -1,38 +1,68 @@
-# LAB-13-AZ: Using Basic Terraform Functions
+# LAB-14-AZURE: Using Terraform Registry Modules
 
 ## Overview
-In this lab, you will learn how to use a few essential Terraform built-in functions: `min`, `max`, `join`, and `toset`. These functions help you manipulate values and create more flexible infrastructure configurations. The lab uses Azure free-tier resources to ensure no costs are incurred.
+In this lab, you will learn how to use modules from the Terraform Registry to deploy Azure infrastructure efficiently. You'll use multiple modules, pass outputs between them, and reuse the same module with different parameters. The lab uses free-tier-compatible Azure resources.
+
+[![Lab 14](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
 
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
 - Terraform installed
-- Azure free account
-- Basic understanding of Terraform and Azure concepts
+- Azure subscription
+- Azure CLI installed and authenticated
 
-Note: Azure credentials are required for this lab.
+Note: You must be logged into Azure CLI (`az login`) before running this lab.
 
 ## How to Use This Hands-On Lab
 
-1. **Create a Codespace** from this repo (click the button below).  
+1. **Create a Codespace** from this repo.  
 2. Once the Codespace is running, open the integrated terminal.
-3. Follow the instructions in each **lab** to complete the exercises.
+3. Follow the instructions in each section to complete the exercises.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/btkrausen/terraform-codespaces)
 
 ## Estimated Time
-20 minutes
+15 minutes
 
 ## Initial Configuration Files
 
-### providers.tf
+The lab directory contains the following initial files:
+
+- `main.tf`
+- `variables.tf`
+- `providers.tf`
+
+## Lab Steps
+
+### 1. Configure Azure Credentials
+
+First, ensure you're logged into Azure:
+
+```bash
+az login
+```
+
+Set the Azure Subscription ID using the environment variable:
+```bash
+export ARM_SUBSCRIPTION_ID=abcde-12345-abcde-67890-abcde
+```
+
+### 2. Set Up the Provider Configuration
+
+Add the `random` provider to your `providers.tf` file:
+
 ```hcl
 terraform {
-  required_version = ">= 1.10.0"
+  required_version = ">= 1.0.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 4.0"
+      version = ">=4.0.0"
+    }
+    random = {                        #  <--- add this block
+      source  = "hashicorp/random"
+      version = ">=3.0.0"
     }
   }
 }
@@ -42,202 +72,207 @@ provider "azurerm" {
 }
 ```
 
-### variables.tf
-```hcl
-variable "location" {
-  description = "Azure region to deploy resources"
-  type        = string
-  default     = "eastus"
-}
+### 3. Create Variables
 
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-variable "address_spaces" {
-  description = "List of address spaces for virtual networks"
-  type        = list(string)
-  default     = ["10.0.0.0/16", "10.1.0.0/16", "10.2.0.0/16"]
-}
-
-variable "subnet_prefixes" {
-  description = "List of subnet address prefixes"
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24"]
-}
-
-variable "teams" {
-  description = "List of teams with duplicates"
-  type        = list(string)
-  default     = ["development", "operations", "security", "development"]
-}
-```
-
-## Lab Steps
-
-### 1. Configure Azure Credentials
-
-Make sure you're authenticated with Azure:
-
-```bash
-az login
-```
-
-If you're in a codespace, you might need to use device code authentication:
-```bash
-az login --use-device-code
-```
-
-### 2. Create a Resource Group with Join Function
-
-Create a `main.tf` file with a resource group using the join function:
+Add the following variable definition to your `variables.tf` file:
 
 ```hcl
-# Use join function to create a resource group name
-resource "azurerm_resource_group" "main" {
-  name     = join("-", [var.environment, "resources"])
+# Simple map of subnet configurations
+variable "subnets" {
+  description = "Map of subnet names to address prefixes"
+  type        = map(string)
+  default = {
+    "web"   = "10.0.1.0/24"
+    "app"   = "10.0.2.0/24"
+    "data"  = "10.0.3.0/24"
+    "mgmt"  = "10.0.4.0/24"
+  }
+}
+```
+
+### 4. Create an Azure Resource Group and then a Virtual Network using a Module from the Terraform Registry:
+
+Add the following blocks to your `main.tf` file:
+
+```hcl
+# Resource Group
+resource "azurerm_resource_group" "example" {
+  name     = "rg-${var.environment}-modules"
   location = var.location
-
+  
   tags = {
     Environment = var.environment
-    # This creates "dev-resources" using the join function
+    Terraform   = "true"
   }
 }
-```
 
-### 3. Use Min Function for Virtual Network Count
+# Use the Virtual Network module from Terraform Registry
+module "vnet" {
+  source  = "Azure/vnet/azurerm"
+  version = "5.0.1"
 
-Add virtual network resources using the min function to determine how many to create:
-
-```hcl
-# Use min function to determine how many virtual networks to create
-resource "azurerm_virtual_network" "main" {
-  count               = min(2, length(var.address_spaces))
-  name                = "${var.environment}-vnet-${count.index + 1}"
-  address_space       = [var.address_spaces[count.index]]
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = azurerm_resource_group.example.name
+  vnet_location       = var.location
+  
+  # Basic network configuration
+  vnet_name           = "vnet-${var.environment}"
+  address_space       = ["10.0.0.0/16"]
+  
+  # Empty subnet lists - we'll create subnets using a different module with for_each
+  subnet_names        = []
+  subnet_prefixes     = []
 
   tags = {
-    Name = "${var.environment}-vnet-${count.index + 1}"
+    Terraform   = "true"
+    Environment = var.environment
   }
 }
 ```
 
-### 4. Create Subnets with Min Function
+### 5. Use the AVM Network Module with for_each for Subnets
 
-Add subnet resources using the min function:
-
-```hcl
-# Use min function to limit subnet count
-resource "azurerm_subnet" "main" {
-  count                = min(length(var.subnet_prefixes), 3)
-  name                 = "${var.environment}-subnet-${count.index + 1}"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main[0].name
-  address_prefixes     = [var.subnet_prefixes[count.index]]
-}
-```
-
-### 5. Use Toset Function to Remove Duplicates
-
-Create a network security group with tags based on unique team names:
+Add the following to your `main.tf` file to create multiple subnets using `for_each`:
 
 ```hcl
-# Use toset function to remove duplicates from teams list
-locals {
-  unique_teams = toset(var.teams)
+# Random string for uniqueness
+resource "random_string" "suffix" {
+  length  = 5
+  special = false
+  upper   = false
 }
 
-# Create network security group
-resource "azurerm_network_security_group" "example" {
-  name                = "${var.environment}-nsg"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
+# Using a module with for_each to create multiple subnets
+module "avm_vnet" {
+  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version = "0.8.1"
+  
+  # Basic VNet configuration
+  enable_telemetry    = false
+  name                = "vnet-main-${random_string.suffix.result}"
+  address_space       = ["10.0.0.0/16"]
+  location            = var.location
+  resource_group_name = azurerm_resource_group.example.name
+  
+  # Here's the for_each on subnets
+  subnets = {
+    for name, prefix in var.subnets : name => {
+      name             = "snet-${name}"
+      address_prefixes = [prefix]
+    }
+  }
+  
   tags = {
-    Name  = "${var.environment}-nsg"
-    Teams = join(", ", local.unique_teams)
-    # This joins unique team names with commas
+    Environment = var.environment
+    Terraform   = "true"
+    ModuleDemo  = "true"
   }
 }
 ```
 
-### 6. Add Simple Outputs
+### 6. Create Outputs
 
-Create an `outputs.tf` file with a few outputs:
+Create an `outputs.tf` file with the following output blocks:
 
 ```hcl
+output "vnet_id" {
+  description = "The ID of the basic Virtual Network"
+  value       = module.vnet.vnet_id
+}
+
+output "vnet_name" {
+  description = "The name of the basic Virtual Network"
+  value       = module.vnet.vnet_name
+}
+
+output "avm_vnet_id" {
+  description = "The ID of the AVM Virtual Network"
+  value       = module.avm_vnet.resource.id
+}
+
 output "resource_group_id" {
   description = "The ID of the resource group"
-  value       = azurerm_resource_group.main.id
-}
-
-output "vnet_count" {
-  description = "Number of virtual networks created (using min function)"
-  value       = min(2, length(var.address_spaces))
-}
-
-output "subnet_count" {
-  description = "Number of subnets created (using min function)"
-  value       = min(length(var.subnet_prefixes), 3)
-}
-
-output "unique_teams" {
-  description = "List of unique teams (using toset function)"
-  value       = local.unique_teams
-}
-
-output "nsg_name" {
-  description = "NSG name (created with join function)"
-  value       = azurerm_network_security_group.example.name
+  value       = azurerm_resource_group.example.id
 }
 ```
 
-### 7. Apply the Configuration
+### 7. Initialize the Working Directory
 
-Initialize and apply the configuration:
+Initialize Terraform to download the modules:
 
 ```bash
 terraform init
+```
+
+Notice how Terraform:
+- Downloads the modules from the Terraform Registry
+- Places the modules under the `.terraform` directory
+
+### 8. Apply the Configuration
+
+Plan and apply the infrastructure:
+
+```bash
 terraform plan
 terraform apply
 ```
 
-Observe how the functions work:
-- `join` creates string values by combining elements
-- `min` calculates the minimum value between two numbers
-- `toset` converts a list to a set, removing duplicates
+Observe how Terraform:
+- Creates a Resource Group
+- Creates a basic Virtual Network using one module
+- Creates another VNet with multiple subnets using for_each with the module
+- Creates a Network Security Group and associates it with one of the subnets
+- Successfully references outputs between different modules
 
-### 8. Clean Up
+### 9. Clean Up
 
-Remove all created resources:
+When you're finished, clean up the resources:
 
 ```bash
 terraform destroy
 ```
 
-## Function Reference
+## Understanding Module Usage
 
-### Join Function
-The `join` function combines a list of strings with a specified delimiter.
-```
-join(separator, list)
-```
-Example: `join("-", ["dev", "resources"])` produces `"dev-resources"`
+Here are the key concepts demonstrated in this lab:
 
-### Min Function
-The `min` function returns the minimum value from a set of numbers.
+### Basic Module Usage
+```hcl
+module "vnet" {
+  source  = "Azure/vnet/azurerm"
+  version = "5.0.1"
+  
+  resource_group_name = azurerm_resource_group.example.name
+  vnet_location       = var.location
+  vnet_name           = "vnet-${var.environment}"
+  address_space       = ["10.0.0.0/16"]
+}
 ```
-min(number1, number2, ...)
-```
-Example: `min(3, 5)` produces `3`
+- The `source` attribute specifies where to find the module
+- The `version` attribute pins the module to a specific version
+- Other attributes are inputs to the module
 
-### Toset Function
-The `toset` function converts a list to a set, removing any duplicate elements.
+### Using `for_each` with Modules
+```hcl
+subnets = {
+  for name, prefix in var.subnets : name => {
+    name             = "snet-${name}"
+    address_prefixes = [prefix]
+  }
+}
 ```
-toset(list)
+- This creates a subnet for each entry in the variable
+- Each subnet gets unique properties based on the map key and value
+
+### Module Outputs
+```hcl
+subnet_ids = [module.avm_vnet.subnet_ids["web"]]
 ```
-Example: `toset(["a", "b", "a", "c"])` produces `["a", "b", "c"]`
+- One module can reference outputs from another module
+- This enables building complex infrastructure with interdependent components
+
+## Additional Resources
+
+- [Terraform Registry](https://registry.terraform.io/)
+- [Azure Virtual Network Module](https://registry.terraform.io/modules/Azure/vnet/azurerm/latest)
+- [Azure AVM Virtual Network Module](https://registry.terraform.io/modules/Azure/avm-res-network-virtualnetwork/azurerm/latest)
+- [Azure Network Security Group Module](https://registry.terraform.io/modules/Azure/network-security-group/azurerm/latest)
