@@ -1,11 +1,11 @@
-variable "environment" {
-  description = "Environment name (e.g., dev, prod)"
+variable "location" {
+  description = "The Azure region to deploy resources"
   type        = string
-  default     = "prod"
+  default     = "eastus"
 }
 
-variable "location" {
-  description = "Azure region for all resources"
+variable "environment" {
+  description = "Environment name"
   type        = string
-  default     = "East US"
+  default     = "dev"
 }
