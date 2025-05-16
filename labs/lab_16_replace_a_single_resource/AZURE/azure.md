@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to replace and remove resources in Terraform. You'll practice using the `-replace` flag and removing resources from configuration using free Azure resources.
 
+[![Lab 16](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 ## Prerequisites
 - Terraform installed
 - Azure free tier account
