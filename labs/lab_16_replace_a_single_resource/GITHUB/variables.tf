@@ -1,14 +1,3 @@
-variable "github_token" {
-  description = "GitHub personal access token"
-  type        = string
-  sensitive   = true
-}
-
-variable "github_owner" {
-  description = "GitHub username or organization"
-  type        = string
-}
-
 variable "prefix" {
   description = "Prefix for resource names"
   type        = string

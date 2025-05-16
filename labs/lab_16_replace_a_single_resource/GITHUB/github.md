@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will learn how to replace and remove resources in Terraform when working with GitHub. You'll practice using the `-replace` flag and removing resources from configuration using GitHub resources.
 
+[![Lab 16](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/github_lab_validation.yml)
+
 ## Prerequisites
 - Terraform installed (v1.0.0+)
 - GitHub account
@@ -15,180 +17,17 @@ In this lab, you will learn how to replace and remove resources in Terraform whe
 
 Create the following files in your working directory:
 
-### variables.tf
-```hcl
-variable "github_token" {
-  description = "GitHub personal access token"
-  type        = string
-  sensitive   = true
-}
-
-variable "github_owner" {
-  description = "GitHub username or organization"
-  type        = string
-}
-
-variable "prefix" {
-  description = "Prefix for resource names"
-  type        = string
-  default     = "tflab16"
-}
-
-variable "repository_visibility" {
-  description = "Repository visibility setting"
-  type        = string
-  default     = "private"
-}
-
-variable "repository_description" {
-  description = "Description for the repository"
-  type        = string
-  default     = "Repository created for Terraform Lab 16"
-}
-
-variable "repository_topics" {
-  description = "Topics for the repository"
-  type        = list(string)
-  default     = ["terraform", "lab", "example"]
-}
-
-variable "auto_init" {
-  description = "Initialize repository with README"
-  type        = bool
-  default     = true
-}
-
-variable "gitignore_template" {
-  description = "Template for gitignore file"
-  type        = string
-  default     = "Terraform"
-}
-
-variable "random_suffix_length" {
-  description = "Length of random suffix for unique resource names"
-  type        = number
-  default     = 6
-}
-
-variable "special_chars_allowed" {
-  description = "Allow special characters in random string"
-  type        = bool
-  default     = false
-}
-
-variable "upper_chars_allowed" {
-  description = "Allow uppercase characters in random string"
-  type        = bool
-  default     = false
-}
-```
-
-### main.tf
-```hcl
-# GitHub Repository
-resource "github_repository" "example" {
-  name        = "${var.prefix}-repo-${random_string.suffix.result}"
-  description = var.repository_description
-  visibility  = var.repository_visibility
-  
-  auto_init          = var.auto_init
-  gitignore_template = var.gitignore_template
-  topics             = var.repository_topics
-}
-
-# GitHub Branch
-resource "github_branch" "development" {
-  repository = github_repository.example.name
-  branch     = "development"
-}
-
-# Branch Protection
-resource "github_branch_protection" "main" {
-  repository_id = github_repository.example.node_id
-  pattern       = "main"
-  
-  required_pull_request_reviews {
-    dismiss_stale_reviews           = true
-    required_approving_review_count = 1
-  }
-}
-
-# Repository File
-resource "github_repository_file" "readme" {
-  repository          = github_repository.example.name
-  branch              = "main"
-  file                = "README.md"
-  content             = "# ${github_repository.example.name}\n\n${var.repository_description}\n"
-  commit_message      = "Update README"
-  commit_author       = "Terraform"
-  commit_email        = "terraform@example.com"
-  overwrite_on_create = true
-}
-
-# Random string for resource name uniqueness
-resource "random_string" "suffix" {
-  length  = var.random_suffix_length
-  special = var.special_chars_allowed
-  upper   = var.upper_chars_allowed
-}
-```
-
-### providers.tf
-```hcl
-terraform {
-  required_version = ">= 1.0.0"
-  required_providers {
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "github" {
-  token = var.github_token
-  owner = var.github_owner
-}
-```
-
-### outputs.tf
-```hcl
-output "repository_name" {
-  description = "Name of the created repository"
-  value       = github_repository.example.name
-}
-
-output "repository_url" {
-  description = "URL of the created repository"
-  value       = github_repository.example.html_url
-}
-
-output "development_branch" {
-  description = "Name of the development branch"
-  value       = github_branch.development.branch
-}
-```
-
-### terraform.tfvars.example
-```hcl
-# Copy this file to terraform.tfvars and update with your values
-github_token = "your_personal_access_token_here"
-github_owner = "your_github_username_or_organization_here"
-```
+ - `variables.tf`
+ - `main.tf`
+ - `providers.tf`
+ - `outputs.tf`
 
 ## Lab Steps
 
-### 1. Configure GitHub Token
-
-Update the tfvars file with your GitHub information:
+### 1. Configure GitHub Credentials
 
 ```bash
-github_token = "<your_personal_access_token_here>"
-github_owner = "<your_github_username_or_organization_here>"
+export GITHUB_TOKEN="<your_github_token>"
 ```
 
 ### 2. Initialize and Apply
@@ -231,7 +70,7 @@ Observe how Terraform:
 
 ### 5. Remove a Resource by Deleting it from Configuration
 
-Remove or comment out the branch protection resource from main.tf:
+Remove or comment out the branch protection resource from `main.tf`:
 
 ```hcl
 # Branch Protection
@@ -246,21 +85,25 @@ Remove or comment out the branch protection resource from main.tf:
 # }
 ```
 
+> Hint: You can quickly toggle single line comments by highlighting the lines and using the `Command` + `/` on Mac or `CTL` + `/` on Windows.
+
 Apply the changes:
 
 ```bash
 terraform apply -auto-approve
 ```
 
-Observe that Terraform plans to remove the branch protection rule.
+Observe that Terraform will remove the branch protection rule because it's no longer part of our configuration (because we commented it out).
 
 ### 6. Remove a Resource Using `terraform destroy -target`
 
-Now, let's remove the development branch using targeted destroy without changing the configuration:
+Now, let's remove the **development** branch using targeted destroy without changing the configuration:
 
 ```bash
 terraform destroy -target=github_branch.development -auto-approve
 ```
+
+Notice that Terraform will destroy the GitHub Branch since we targeted that specific resource on a `terraform destroy` command. Type in `yes` to confirm and destroy the resource.
 
 Verify it's gone:
 
@@ -268,7 +111,10 @@ Verify it's gone:
 terraform state list
 ```
 
-Run a normal apply to recreate it:
+You should NOT see a `github_branch.development` in the list of managed resources.
+
+
+Run a normal apply to recreate it - this is because we did NOT remove it from our desired configuration (`main.tf`) and Terraform compared the real-world resources to our desired configuration and, as a result, created the policy definition again.
 
 ```bash
 terraform apply -auto-approve
