@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.10.0"
+  required_version = ">= 1.0.0"
   required_providers {
     github = {
       source  = "integrations/github"
@@ -12,7 +12,4 @@ terraform {
   }
 }
 
-provider "github" {
-  token = var.github_token
-  owner = var.github_owner
-}
+provider "github" {}

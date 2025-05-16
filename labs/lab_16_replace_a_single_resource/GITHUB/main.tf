@@ -3,7 +3,7 @@ resource "github_repository" "example" {
   name        = "${var.prefix}-repo-${random_string.suffix.result}"
   description = var.repository_description
   visibility  = var.repository_visibility
-
+  
   auto_init          = var.auto_init
   gitignore_template = var.gitignore_template
   topics             = var.repository_topics
@@ -19,7 +19,7 @@ resource "github_branch" "development" {
 resource "github_branch_protection" "main" {
   repository_id = github_repository.example.node_id
   pattern       = "main"
-
+  
   required_pull_request_reviews {
     dismiss_stale_reviews           = true
     required_approving_review_count = 1
