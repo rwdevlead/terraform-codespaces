@@ -3,6 +3,8 @@
 ## Overview
 In this lab, you will create your own local Terraform modules and use them to build Azure resources. You'll create two modules - one for Azure Resource Groups and one for Azure Role Definitions - and then call these modules from a parent configuration. This lab teaches you how to build reusable modules, pass variables between modules, and organize your Terraform code efficiently. All resources created in this lab are part of the Azure free tier or incur minimal costs.
 
+[![Lab 15](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml/badge.svg?branch=main)](https://github.com/btkrausen/terraform-testing/actions/workflows/azure_lab_validation.yml)
+
 **Preview Mode**: Use `Cmd/Ctrl + Shift + V` in VSCode to see a nicely formatted version of this lab!
 
 ## Prerequisites
