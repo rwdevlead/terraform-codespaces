@@ -1,7 +1,27 @@
-# Ignore Terraform state and provider binaries
-.terraform/
+# Terraform
 *.tfstate
 *.tfstate.*
+.terraform/
 crash.log
 debug.log
-.terraform.lock.hcl
+downloads/
+*.tfvars
+*.backup
+*.log
+
+# Local .env files
+.env
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Python virtual environments
+venv/
+__pycache__/
+
+# Node modules
+node_modules/
