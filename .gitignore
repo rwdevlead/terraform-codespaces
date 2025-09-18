@@ -1,7 +1,29 @@
-# Ignore Terraform state and provider binaries
+# Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
 crash.log
-debug.log
-.terraform.lock.hcl
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Local .env files
+.env*
+
+# VS Code
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Linux
+*~
