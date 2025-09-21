@@ -1,3 +1,9 @@
+# Data source outputs
+output "current_user" {
+  description = "Current GitHub user name"
+  value       = data.github_user.current.name
+}
+
 output "repository_id" {
   description = "ID of the created repository"
   value       = github_repository.example.repo_id
