@@ -17,3 +17,8 @@ output "repository_visibility" {
   description = "Visibility of the repository"
   value       = github_repository.example.visibility
 }
+
+output "development_repo" {
+  description = "The name of the development repo"
+  value       = github_repository.development.name
+}
